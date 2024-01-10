@@ -1,16 +1,21 @@
 # goldsrcmap
 ---------
-A python MAP file parser 
+Python module to manipulate goldsrc engine .map files
 
-It's a work in progress.
+work in progress...
 
 # Installation
+
+~~pip install goldsrcmap~~ *not implemented*
+
 Add `src` content to your working directory
 e.g. `/Mapping/Scripting/`
 
 Now create your scripts inside `/Scripting/`
 
 # Usage
+
+~~Documentation~~ *not implemented*
 
 Load map:
 ```Python
@@ -80,7 +85,13 @@ gsm.save_map(m, 'cstrike/maps/generated.map')
 ```
 ---------
 
-TODO
-~~pip install goldsrcmap~~
+Documentation
 
+
+---------
+# References:
+
+https://developer.valvesoftware.com/wiki/MAP_(file_format)
+
+https://github.com/stefanha/map-files/blob/master/MAPFiles.pdf
 
