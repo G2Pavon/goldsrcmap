@@ -18,7 +18,7 @@ class Map:
 
     def __init__(self, filename=None):
         self.name = filename
-        self.path = ''
+        self.path = '' # currently unused
         self.entities: list[Entity] = []
         self.entity_counter: int = 0
 
@@ -58,26 +58,26 @@ class Map:
     
     @property
     def brushes(self) -> Union[List[Brush], None]:
-        """Get a list of all brushes in the map."""
+        """Get a list of all brushes"""
         brush_list = [brush for entity in self.entities for brush in entity.brushes]
         return brush_list or None
     
     @property
     def brush_entities(self) -> Union[list[Entity],None]: 
-        """Get a list of brush entities"""
+        """Get a list of all brush entities"""
         if self.entities:
             return [entity for entity in self.entities if entity.is_brush_entity]
         return None
 
     @property
     def faces(self)  -> Union[list[Face],None]:
-        """Get a list of all faces in the map"""
+        """Get a list of all brush faces"""
         face_list = [face for entity in self.entities for brush in entity.brushes for face in brush.faces]
         return face_list or None
     
     @property
     def point_entities(self) -> Union[list[Entity],None]: 
-        """Get a list of point entities"""
+        """Get a list of all point entities"""
         if self.entities:
             return [entity for entity in self.entities if entity.is_point_entity]
         return None
@@ -141,7 +141,7 @@ class Map:
             *args (Brush or list[Brush] ): Brushes to add
 
         Raises:
-            TypeError: If the input is not a Brush or a list of Brushes
+            TypeError: If the input is not a Brush
         """
         for arg in args:
             brush_list = arg if isinstance(arg, list) else [arg]
