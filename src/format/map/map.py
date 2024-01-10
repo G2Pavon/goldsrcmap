@@ -43,17 +43,7 @@ class Map:
         return f"{self.entities}"
     
     def __iter__(self): 
-        """Return an iterator over the Map entities
-
-        Example:
-        >>> # Traditional syntax
-        >>> for entity in self.entities:
-                # Your logic...
-        >>>
-        >>> # New alternative syntax
-        >>> for entity in self:
-                # Your logic...
-        """
+        """Return an iterator over the Map entities"""
         return iter(self.entities)
     
     @property
@@ -89,25 +79,12 @@ class Map:
     
     @wad.setter
     def wad(self, wads: str) -> None:
-        """Set the WAD path in the worldspawn entity
-
-        Args:
-            wads (str): The WAD path.
-        Example:
-        >>> # One wad
-        >>> self.wad = 'path/to/file1.wad'
-        >>> # Multi wads
-        >>> self.wad = 'path/to/file2.wad; path/to/file'
-        """
+        """Set the WAD path in the worldspawn entity"""
         self.worldspawn.properties['wad'] = wads
         
     @property
     def worldspawn(self) -> Union[Entity, None]:
-        """Get the worldspawn entity.
-
-        Raises:
-            ValueError: If the worldspawn entity is not at index 0 in the map entity list.
-        """
+        """Get the worldspawn entity"""
         if self.entities:
             if self.entities[0].classname == 'worldspawn':
                 return self.entities[0]
@@ -116,14 +93,7 @@ class Map:
         
 
     def add_entity(self, *args: Union[Entity, List[Entity]]) -> None:
-        """Add entities to map
-
-        Args:
-            *args (Entity or list[Entity]): Entities to add
-
-        Raises:
-            TypeError: If the input is not an Entity
-        """
+        """Add entities to map"""
         for arg in args:
             ent_list = arg if isinstance(arg, list) else [arg]
             for entity in ent_list:
@@ -135,14 +105,7 @@ class Map:
                     raise TypeError(f"Expected <class {Entity.__name__}> but got {type(entity).__name__}")
     
     def add_brush(self, *args: Union[Brush, List[Brush]]) -> None:
-        """Add brushes to worldspawn entity
-
-        Args:
-            *args (Brush or list[Brush] ): Brushes to add
-
-        Raises:
-            TypeError: If the input is not a Brush
-        """
+        """Add brushes to worldspawn entity"""
         for arg in args:
             brush_list = arg if isinstance(arg, list) else [arg]
             for brush in brush_list:
