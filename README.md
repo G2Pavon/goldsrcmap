@@ -43,7 +43,8 @@ for entity in m.entities:
     for brush in entity: # alternative syntax without using brushes @property
       brush.move_by(256, 256, 64)
   if entity['classname'] == 'func_plat': # without using properties attribute
-    brush.move_to(32,32,256, centroid=True)
+    for brush in entity:
+      brush.move_to(32,32,256, centroid=True)
             
   # more logic here
 
