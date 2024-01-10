@@ -122,3 +122,23 @@ class Entity:
                     self.brushes.append(brush)
                 else:
                     raise TypeError(f"Expected <class {Brush.__name__}> but got {type(brush).__name__}")
+
+    def move_by(self, x: float, y: float, z: float):
+        """Moves the entity by a specified offsets"""
+        if self.is_brush_entity:
+            for brush in self:
+                brush.move_by(x, y, z)
+        elif self.is_point_entity:
+            current = self.origin
+            x += current.x
+            y += current.y
+            z += current.z
+            self['origin'] = f'{x} {y} {z}'
+    
+    def move_to(self, x: float, y: float, z: float, centroid: bool=True, bbox: bool=False):
+        """Move the entity to a specific coordinate"""
+        if self.is_brush_entity:
+            for brush in self:
+                brush.move_to(x, y, z, centroid, bbox)
+        elif self.is_point_entity:
+            self['origin'] = f'{x} {y} {z}'
