@@ -9,9 +9,19 @@ work in progress...
 ~~pip install goldsrcmap~~ *not implemented*
 
 Add `src` content to your working directory
-e.g. `/Mapping/Scripting/`
+e.g. `/Mapping/Scripting/`:
+```
+/Mapping/Scripting/format
+/Mapping/Scripting/utils
+/Mapping/Scripting/__init__.py
+/Mapping/Scripting/goldsrcmap.py
+```
 
-Now create your scripts inside `/Scripting/`
+
+Now create scripts inside `/Scripting/`
+```
+/Mapping/Scripting/your_script.py
+```
 
 # Usage
 
