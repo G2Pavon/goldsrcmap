@@ -159,3 +159,7 @@ class Map:
                     self.worldspawn.add_brush(brush)
                 else:
                     raise TypeError(f"Expected <class {Brush.__name__}> but got {type(brush).__name__}")
+                
+    def copy(self):
+        """Return a deepcopy of the current map instance, useful for backup"""
+        return deepcopy(self)
