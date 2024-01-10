@@ -105,3 +105,5 @@ https://developer.valvesoftware.com/wiki/MAP_(file_format)
 
 https://github.com/stefanha/map-files/blob/master/MAPFiles.pdf
 
+https://github.com/surf-gorange/PyVMF
+
