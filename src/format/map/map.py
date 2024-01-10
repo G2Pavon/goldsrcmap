@@ -7,7 +7,13 @@ from format.map.face import Face
 
 class Map:
     """
-    Represents the .map file with its entities stored in a list
+    Represents the .map file with its entities stored in a list.
+
+    Attributes:
+        name (str): The filename of the map.
+        path (str): The path to the map file.
+        entities (List[Entity]): List of entities in the map.
+        entity_counter (int): Counter for assigning unique IDs to entities.
     """
 
     def __init__(self, filename=None):
@@ -51,87 +57,72 @@ class Map:
         return iter(self.entities)
     
     @property
-    def brushes(self) -> Union[list[Brush],None]:
-        """Get a list of all brushes in the map
-
-        Raises:
-            ValueError: If there are no brushes
-        """
-        brush_lst = [brush for entity in self for brush in entity]
-        if not brush_lst:
-            return None
-        return brush_lst
+    def brushes(self) -> Union[List[Brush], None]:
+        """Get a list of all brushes in the map."""
+        brush_list = [brush for entity in self.entities for brush in entity.brushes]
+        return brush_list or None
     
     @property
     def brush_entities(self) -> Union[list[Entity],None]: 
-        """Get a list of brush entities
-
-        Raises:
-            ValueError: If there are no entities
-        """
+        """Get a list of brush entities"""
         if self.entities:
-            ent_lst = [entity for entity in self if entity.is_brush_entity]
-            if not ent_lst:
-                return None
-            return ent_lst
-        else:
-            raise ValueError("No entities on the map")
+            return [entity for entity in self.entities if entity.is_brush_entity]
+        return None
 
     @property
     def faces(self)  -> Union[list[Face],None]:
-        """Get a list of all faces in the map
-
-        Raises:
-            ValueError: If there are no brush faces
-        """
-        face_lst = [face for entity in self for brush in entity for face in brush]
-        if not face_lst:
-            return None
-        return face_lst
+        """Get a list of all faces in the map"""
+        face_list = [face for entity in self.entities for brush in entity.brushes for face in brush.faces]
+        return face_list or None
     
     @property
     def point_entities(self) -> Union[list[Entity],None]: 
-        """Get a list of point entities
-
-        Raises:
-            ValueError: If there are no entities
-        """
+        """Get a list of point entities"""
         if self.entities:
-            ent_lst = [entity for entity in self if entity.is_point_entity]
-            if not ent_lst:
-                return None
-            return ent_lst
-        else:
-            raise ValueError("There are no entities on the map")
+            return [entity for entity in self.entities if entity.is_point_entity]
+        return None
     
     @property
-    def wad(self):
-        return self.worldspawn['wad']
+    def wad(self) -> str:
+        """Return the used wads"""
+        return self.worldspawn.properties.get('wad', '')
     
     @wad.setter
-    def wad(self, wads: str):
-        self.worldspawn['wad'] = wads
+    def wad(self, wads: str) -> None:
+        """Set the WAD path in the worldspawn entity
+
+        Args:
+            wads (str): The WAD path.
+        Example:
+        >>> # One wad
+        >>> self.wad = 'path/to/file1.wad'
+        >>> # Multi wads
+        >>> self.wad = 'path/to/file2.wad; path/to/file'
+        """
+        self.worldspawn.properties['wad'] = wads
         
     @property
-    def worldspawn(self) -> Entity:
+    def worldspawn(self) -> Union[Entity, None]:
         """Get the worldspawn entity.
 
         Raises:
-            ValueError: If there are no entities or the worldspawn entity is not at index 0 in the map entity list.
+            ValueError: If the worldspawn entity is not at index 0 in the map entity list.
         """
         if self.entities:
             if self.entities[0].classname == 'worldspawn':
                 return self.entities[0]
-        raise ValueError(f"Worldspawn entity not found. There is something wrong with the map file, should be at the beginning.")
+            raise ValueError(f"Worldspawn entity not found. There is something wrong with the map")
+        return None
+        
 
     def add_entity(self, *args: Union[Entity, List[Entity]]) -> None:
-        """Add entities to the map
+        """Add entities to map
 
         Args:
-            *args (Entity or list[Entity] ): Entities to add
+            *args (Entity or list[Entity]): Entities to add
 
         Raises:
-            TypeError: If the input is not an Entity or a list of Entities.
+            TypeError: If the input is not an Entity
         """
         for arg in args:
             ent_list = arg if isinstance(arg, list) else [arg]
@@ -144,7 +135,7 @@ class Map:
                     raise TypeError(f"Expected <class {Entity.__name__}> but got {type(entity).__name__}")
     
     def add_brush(self, *args: Union[Brush, List[Brush]]) -> None:
-        """Add brushes to the worldspawn entity
+        """Add brushes to worldspawn entity
 
         Args:
             *args (Brush or list[Brush] ): Brushes to add
