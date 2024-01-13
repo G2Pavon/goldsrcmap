@@ -1,8 +1,6 @@
 from copy import deepcopy
 from typing import Optional, Union
 
-from math import atan2
-
 from format.map.face import Face
 from format.map.texture import Texture
 
