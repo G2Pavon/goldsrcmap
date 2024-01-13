@@ -166,7 +166,6 @@ class Brush:
 
     def _get_vertices(self) -> list[Point]:
         """Return the vertices of the brush"""
-        #TODO: Order vertices in clockwise direction
         brush_vertices = []
 
         for i in range(len(self.faces) - 2):
@@ -194,8 +193,31 @@ class Brush:
                             self.faces[j]._add_vertex(vertex)
                             self.faces[k]._add_vertex(vertex)
                             brush_vertices.append(vertex)
+
+        for face in self.faces:
+            vertices = face._vertices
+            center = face.centroid()
+
+            for n in range(len(vertices) - 2):
+                a = (face._vertices[n] - center).normalized()
+                p = Plane(face._vertices[n], center, center + face.normal)
+                smallest_angle = -1
+                smallest = -1
+
+                for m in range(n + 1, len(vertices)):
+                    if not p.point_behind(face._vertices[m]):
+                        b = (face._vertices[m] - center).normalized()
+                        Angle = a.dot(b)
+
+                        if Angle > smallest_angle:
+                            smallest_angle = Angle
+                            smallest = m
+
+                face._vertices[n + 1], face._vertices[smallest] = face._vertices[smallest], face._vertices[n + 1]
+
         return brush_vertices
-    
+
+
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        DUNDER METHODS                            ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
