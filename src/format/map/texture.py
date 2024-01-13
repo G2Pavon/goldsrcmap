@@ -7,14 +7,14 @@ class Texture:
     Represents a texture with properties like name, axes, offsets, rotation, and scales.
 
     Attributes:
-    - name: The name of the texture.
-    - u_axis: The U-axis vector of the texture.
-    - u_offset: The U-axis offset of the texture.
-    - v_axis: The V-axis vector of the texture.
-    - v_offset: The V-axis offset of the texture.
-    - rotation: The rotation angle of the texture.
-    - u_scale: The U-axis scale of the texture.
-    - v_scale: The V-axis scale of the texture.
+      name: The name of the texture.
+      u_axis: The U-axis vector of the texture.
+      u_offset: The U-axis offset of the texture.
+      v_axis: The V-axis vector of the texture.
+      v_offset: The V-axis offset of the texture.
+      rotation: The rotation angle of the texture.
+      u_scale: The U-axis scale of the texture.
+      v_scale: The V-axis scale of the texture.
     """
 
     def __init__(self, name, u_axis, u_offset, v_axis, v_offset, rotation, u_scale, v_scale) -> None:
@@ -28,15 +28,19 @@ class Texture:
         self.v_scale: float = v_scale
         # TODO: self.width and self.height (need WAD parsing)
 
-    def __str__(self):
-        """Return a string representation of the texture"""
-        return f"{self.name} [ {self.u_axis} {self.u_offset} ] [ {self.v_axis} {self.u_offset} ] {self.rotation} {self.u_scale} {self.v_scale}"
 
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        PROPERTY                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     @property
     def normal(self) -> Vector3:
         """Return the normal vector of the texture"""
         return self.u_axis.cross(self.v_axis)
 
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                         METHODS                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     def _rotate_uv_x(self, angle: float) -> None:
         """Rotate (in degrees) the texture around the X-axis"""
         self._rotate_uv(Matrix3x3.rotation_x(angle))
@@ -64,3 +68,11 @@ class Texture:
         # doesn't work when displacement isn't referenced to the origin (0,0,0)
         self.u_offset -= displacement.dot(self.u_axis) / self.u_scale
         self.v_offset -= displacement.dot(self.v_axis) / self.v_scale
+
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        DUNDER METHODS                            ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+    def __str__(self):
+        """Return a string representation of the texture"""
+        return f"{self.name} [ {self.u_axis} {self.u_offset} ] [ {self.v_axis} {self.u_offset} ] {self.rotation} {self.u_scale} {self.v_scale}"

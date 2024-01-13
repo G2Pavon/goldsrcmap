@@ -1,11 +1,14 @@
 from copy import deepcopy
 from typing import Optional, Union
 
+from math import atan2
+
 from format.map.face import Face
+from format.map.texture import Texture
 
 from utils.math.vector import Vector3
 from utils.math.point import Point
-from utils.math.plane import get_intersection
+from utils.math.plane import Plane, get_intersection
 
 class Brush:
     """
@@ -26,14 +29,10 @@ class Brush:
         self._vertices: list[Point] = []
         self._origin: Optional[Point] = None
 
-    def __repr__(self): 
-        """Return a string representation of the brush"""
-        return f'{self.faces}'
-    
-    def __iter__(self): 
-        """Return an iterator over the faces of the brush"""
-        return iter(self.faces)
 
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        PROPERTY                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     @property
     def vertices(self):
         """Get a list of vertices associated with the brush"""
@@ -48,6 +47,10 @@ class Brush:
             self._origin = self.centroid()
         return self._origin
 
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                         METHODS                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     def add_face(self, *args: Union[Face, list[Face]]) -> None:
         """Add face(es) to the brush"""
         for arg in args:
@@ -195,4 +198,13 @@ class Brush:
                             brush_vertices.append(vertex)
         return brush_vertices
     
-#TODO: return new brush from vertices; calc volume; flip h/v; check if 2 brushes share face planes
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        DUNDER METHODS                            ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+    def __repr__(self): 
+        """Return a string representation of the brush"""
+        return f'{self.faces}'
+    
+    def __iter__(self): 
+        """Return an iterator over the faces of the brush"""
+        return iter(self.faces)

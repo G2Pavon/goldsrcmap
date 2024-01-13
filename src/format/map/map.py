@@ -38,49 +38,28 @@ class Map:
             }
             self.add_entity(world)
     
-    def __str__(self) -> str:
-        """Return a string representation of the map."""
-        return f"{self.entities}"
-    
-    def __iter__(self): 
-        """Return an iterator over the Map entities"""
-        return iter(self.entities)
-    
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        PROPERTY                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     @property
-    def brushes(self) -> Union[List[Brush], None]:
+    def brushes(self) -> list[Brush]:
         """Get a list of all brushes"""
-        brush_list = [brush for entity in self.entities for brush in entity.brushes]
-        return brush_list or None
+        return [brush for entity in self.entities for brush in entity.brushes]
     
     @property
-    def brush_entities(self) -> Union[list[Entity],None]: 
+    def brush_entities(self) -> list[Entity]:
         """Get a list of all brush entities"""
-        if self.entities:
-            return [entity for entity in self.entities if entity.is_brush_entity]
-        return None
+        return [entity for entity in self.entities if entity.is_brush_entity]
 
     @property
-    def faces(self)  -> Union[list[Face],None]:
+    def faces(self)  -> list[Face]:
         """Get a list of all brush faces"""
-        face_list = [face for entity in self.entities for brush in entity.brushes for face in brush.faces]
-        return face_list or None
+        return [face for entity in self.entities for brush in entity.brushes for face in brush.faces]
     
     @property
-    def point_entities(self) -> Union[list[Entity],None]: 
+    def point_entities(self) -> list[Entity]: 
         """Get a list of all point entities"""
-        if self.entities:
-            return [entity for entity in self.entities if entity.is_point_entity]
-        return None
-    
-    @property
-    def wad(self) -> str:
-        """Return the used wads"""
-        return self.worldspawn.properties.get('wad', '')
-    
-    @wad.setter
-    def wad(self, wads: str) -> None:
-        """Set the WAD path in the worldspawn entity"""
-        self.worldspawn.properties['wad'] = wads
+        return [entity for entity in self.entities if entity.is_point_entity]
         
     @property
     def worldspawn(self) -> Union[Entity, None]:
@@ -90,8 +69,20 @@ class Map:
                 return self.entities[0]
             raise ValueError(f"Worldspawn entity not found. There is something wrong with the map")
         return None
-        
 
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                         METHODS                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  
+    def add_brush(self, *args: Union[Brush, List[Brush]]) -> None:
+        """Add brushes to worldspawn entity"""
+        for arg in args:
+            brush_list = arg if isinstance(arg, list) else [arg]
+            for brush in brush_list:
+                if isinstance(brush, Brush):
+                    self.worldspawn.add_brush(brush)
+                else:
+                    raise TypeError(f"Expected <class {Brush.__name__}> but got {type(brush).__name__}")
+                
     def add_entity(self, *args: Union[Entity, List[Entity]]) -> None:
         """Add entities to map"""
         for arg in args:
@@ -103,17 +94,19 @@ class Map:
                     self.entities.append(entity)
                 else:
                     raise TypeError(f"Expected <class {Entity.__name__}> but got {type(entity).__name__}")
-    
-    def add_brush(self, *args: Union[Brush, List[Brush]]) -> None:
-        """Add brushes to worldspawn entity"""
-        for arg in args:
-            brush_list = arg if isinstance(arg, list) else [arg]
-            for brush in brush_list:
-                if isinstance(brush, Brush):
-                    self.worldspawn.add_brush(brush)
-                else:
-                    raise TypeError(f"Expected <class {Brush.__name__}> but got {type(brush).__name__}")
-                
+              
     def copy(self):
         """Return a deepcopy of the current map instance, useful for backup"""
         return deepcopy(self)
+    
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        DUNDER METHODS                            ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+    def __str__(self) -> str:
+        """Return a string representation of the map."""
+        return f"{self.entities}"
+    
+    def __iter__(self): 
+        """Return an iterator over the Map entities"""
+        return iter(self.entities)

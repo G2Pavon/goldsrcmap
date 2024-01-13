@@ -1,11 +1,10 @@
-from dataclasses import (dataclass, field)
 from typing import Union, List
 
 from format.map.brush import Brush
 from format.map.face import Face
 from utils.math.point import Point
 
-@dataclass
+
 class Entity:
     """
     Represents an entity in a .map file with properties and associated brushes.
@@ -16,46 +15,16 @@ class Entity:
         id (int): Unique identifier for the entity.
         brush_counter (int): Counter for assigning unique IDs to brushes.
     """
+    def __init__(self):
+        self.properties: dict = {}
+        self.brushes: List[Brush] = []
+        self.id: int = 0
+        self.brush_counter: int = 0
 
 
-    properties: dict = field(default_factory=dict)
-    brushes: List[Brush] = field(default_factory=list)
-    id: int = 0
-    brush_counter: int = 0
-
-    def __repr__(self) -> str:
-        return f"{self.properties} {self.brushes} \n"
-
-    def __iter__(self):
-        """Return an iterator over the entity's brushes"""
-        if self.is_brush_entity:
-            yield from (self.brushes)
-        elif self['classname'] == 'worldspawn':
-            yield from (self.brushes)
-        
-    def __setitem__(self, key: str, value: str) -> None:
-        """Set an item in the entity's property dictionary"""
-        self.properties[key] = value
-        
-    def __getitem__(self, key: str) -> str:
-        """Get the value of a key property"""
-        try:
-            return self.properties[key]
-        except KeyError:
-            raise KeyError(f"Entity N°{self.id}: Property '{key}' not found in entity properties")
-
-    def __contains__(self, key: str) -> bool:
-        """Check if a key is present in the entity's property dictionary"""
-        return key in self.properties
-
-    def __eq__(self, other):
-        """Compare the entity with another object (or string for checking classname)"""
-        if isinstance(other, str):
-            return self.classname == other
-        elif isinstance(other, Entity):
-            return self.properties == other.properties and self.brushes == other.brushes
-        return False
-
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        PROPERTY                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     @property
     def classname(self) -> str:
         """Get the classname value of the entity."""
@@ -97,7 +66,7 @@ class Entity:
         """Check if the entity is a brush entity"""
         if 'classname' not in self.properties:
             raise KeyError(f"Entity N°{self.id}: 'classname' not found")
-        return self['classname'] != 'worldspawn' and self.brushes
+        return bool(self['classname'] != 'worldspawn' and self.brushes)
 
     @property
     def faces(self) -> list[Face]:
@@ -111,6 +80,10 @@ class Entity:
         if self.is_brush_entity or self['classname'] == 'worldspawn':
             return [vertex for brush in self.brushes for vertex in brush.vertices]
 
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                         METHODS                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     def add_brush(self, *args: Union[Brush, List[Brush]]) -> None:
         """Add brush(es) to entity"""
         for arg in args:
@@ -142,3 +115,40 @@ class Entity:
                 brush.move_to(x, y, z, centroid, bbox)
         elif self.is_point_entity:
             self['origin'] = f'{x} {y} {z}'
+
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        DUNDER METHODS                            ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+    def __repr__(self) -> str:
+        return f"{self.properties} {self.brushes} \n"
+
+    def __iter__(self):
+        """Return an iterator over the entity's brushes"""
+        if self.is_brush_entity:
+            yield from (self.brushes)
+        elif self['classname'] == 'worldspawn':
+            yield from (self.brushes)
+        
+    def __setitem__(self, key: str, value: str) -> None:
+        """Set an item in the entity's property dictionary"""
+        self.properties[key] = value
+        
+    def __getitem__(self, key: str) -> str:
+        """Get the value of a key property"""
+        try:
+            return self.properties[key]
+        except KeyError:
+            raise KeyError(f"Entity N°{self.id}: Property '{key}' not found in entity properties")
+
+    def __contains__(self, key: str) -> bool:
+        """Check if a key is present in the entity's property dictionary"""
+        return key in self.properties
+
+    def __eq__(self, other):
+        """Compare the entity with another object (or string for checking classname)"""
+        if isinstance(other, str):
+            return self.classname == other
+        elif isinstance(other, Entity):
+            return self.properties == other.properties and self.brushes == other.brushes
+        return False

@@ -14,22 +14,26 @@ class MapWriter:
         self.output = output
         self.write_map()
 
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                         METHODS                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  
     def write_map(self):
         with open(self.output, 'w') as f:
             f.write('// Game: Half-Life\n')
             f.write('// Format: Valve\n')
             for entity in self.map_instance:
-                f.write(f'// entity {entity.id}\n')
-                f.write('{\n')
-                self.write_properties(f, entity)
-                
-                for brush in entity.brushes:
-                    f.write(f'// brush {brush.id}\n')
+                if entity.properties:
+                    f.write(f'// entity {entity.id}\n')
                     f.write('{\n')
-                    for face in brush.faces:
-                        self.write_face(f, face)
+                    self.write_properties(f, entity)
+                    
+                    for brush in entity.brushes:
+                        f.write(f'// brush {brush.id}\n')
+                        f.write('{\n')
+                        for face in brush.faces:
+                            self.write_face(f, face)
+                        f.write('}\n')
                     f.write('}\n')
-                f.write('}\n')
         print('Saved')
 
     def write_properties(self, f: TextIO, entity: Entity):

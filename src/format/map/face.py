@@ -6,6 +6,7 @@ from format.map.texture import Texture
 from utils.math.plane import Plane
 from utils.math.vector import Vector3
 from utils.math.point import Point
+from utils.math.edge import Edge
 
 
 class Face:
@@ -17,10 +18,10 @@ class Face:
     Plane normal is oriented toward the cross product of (P1-P2) and (P3-P2)
 
     Attributes:
-    - id (int): The unique identifier for the face.
-    - plane (Plane): The Plane that compose the face.
-    - texture (Texture): The texture definition
-    - vertices (list[Point]): List of vertices
+      id (int): The unique identifier for the face.
+      plane (Plane): The Plane that compose the face.
+      texture (Texture): The texture definition
+      vertices (list[Point]): List of vertices
     """
 
     def __init__(self, plane: Plane, texture: Texture):
@@ -28,24 +29,12 @@ class Face:
         self.plane: Plane = plane
         self.texture: Texture = texture
         self.vertices: list[Point] = []
-        #TODO: self.edges list[Edge]
+        self.edges: list[Edge] = []
         #      self.width and self.heigth useful for justify texture? Need wad parser
 
-    def __repr__(self) -> str:
-        """Returns a string representation of the face."""
-        return f"{self.plane} {self.texture} \n"
-
-    def __iter__(self):
-        """Return an iterator over the face plane points"""
-        return iter((self.plane))
-
-    def __contains__(self, other: Union[str, Point]) -> bool:
-        """Checks if a texture or a point is present in the face plane"""
-        if isinstance(other, str):
-            return other in self.texture.name
-        elif isinstance(other, Point):
-            return other in self.plane
-
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        PROPERTY                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     @property
     def normal(self) -> Vector3:
         """Returns the normal vector of the face's plane"""
@@ -56,6 +45,10 @@ class Face:
         """Returns the normal vector of the face's texture"""
         return self.texture.u_axis.cross(self.texture.v_axis).normalize()
     
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                         METHODS                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     def centroid(self) -> Union[Point, None]:
         """Calculates the centroid of the face"""
         if not self.plane.collinear_points():
@@ -134,3 +127,22 @@ class Face:
     def _add_vertex(self, vertex: Point):
         """Add a vertex to the face"""
         self.vertices.append(vertex)
+
+
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        DUNDER METHODS                            ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+    def __repr__(self) -> str:
+        """Returns a string representation of the face."""
+        return f"{self.plane} {self.texture} \n"
+
+    def __iter__(self):
+        """Return an iterator over the face plane points"""
+        return iter((self.plane))
+
+    def __contains__(self, other: Union[str, Point]) -> bool:
+        """Checks if a texture or a point is present in the face plane"""
+        if isinstance(other, str):
+            return other in self.texture.name
+        elif isinstance(other, Point):
+            return other in self.plane
