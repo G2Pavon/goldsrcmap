@@ -63,7 +63,7 @@ class Face:
         """Creates a deep copy of the face"""
         return deepcopy(self)
 
-    def has_texture(self, text_name: str, exact: bool = True):
+    def has_texture(self, text_name: str, exact: bool = True) -> bool:
         """Checks if the face has a specific texture"""
         if exact:
             return self.texture.name == text_name.upper()

@@ -30,7 +30,7 @@ class Point:
     def as_vector(self) -> Vector3:
         return Vector3(self.x, self.y, self.z)
 
-    def distance(self, other: 'Point') -> float:
+    def distance_to_point(self, other: 'Point') -> float:
         """Calculates the Euclidean distance between two points"""
         return sqrt((other.x - self.x)**2 + (other.y - self.y)**2 + (other.z - self.z)**2)
 

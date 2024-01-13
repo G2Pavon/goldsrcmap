@@ -3,7 +3,6 @@ from typing import Union
 
 from utils.math.vector import Vector3
 from utils.math.point import Point
-from utils.math.geometry_utils import is_parallel, is_perpendicular
 
 @dataclass
 class Plane:
@@ -11,7 +10,6 @@ class Plane:
     3-D plane representation defined by three points.
     The plane's normal is oriented toward the cross product of (P1-P2) and (P3-P2)
     """
-    __slots__ = ('p1', 'p2', 'p3','_normal','_d')  # disable dynamic attribute
 
     p1: Point
     p2: Point
@@ -64,11 +62,11 @@ class Plane:
         distance_to_plane = abs(self.normal.dot(point.as_vector()) + self.d)
         return distance_to_plane < threshold
     
-    def is_parallel(self, other) -> bool:
-        return is_parallel(self, other)
+    def is_parallel(self, other: 'Plane') -> bool:
+        return self.normal.is_parallel(other.normal)
 
-    def is_perpendicular(self, other) -> bool:
-        return is_perpendicular(self, other)
+    def is_perpendicular(self, other: 'Plane') -> bool:
+        return self.normal.is_perpendicular(other.normal)
     
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        DUNDER METHODS                            ┃
