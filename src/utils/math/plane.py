@@ -3,121 +3,90 @@ from typing import Union
 
 from utils.math.vector import Vector3
 from utils.math.point import Point
+from utils.math.geometry_utils import is_parallel, is_perpendicular
 
 @dataclass
 class Plane:
     """
-    Represents a 3D plane defined by three points.
+    3-D plane representation defined by three points.
     The plane's normal is oriented toward the cross product of (P1-P2) and (P3-P2)
     """
-    __slots__ = ('p1', 'p2', 'p3')  # disable dynamic attribute
+    __slots__ = ('p1', 'p2', 'p3','_normal','_d')  # disable dynamic attribute
 
     p1: Point
     p2: Point
     p3: Point
+    _normal: Union[None, Vector3] = None
+    _d: Union[None, float] = None
 
-    def __repr__(self):
-        return f"{self.p1} {self.p2} {self.p3}"
-
-    def __getitem__(self, index: int) -> Point:
-        """
-        Gets the point at the specified index.
-
-        Args:
-        - `index` (int): Index of the point (0, 1, or 2)
-        """
-        return (self.p1, self.p2, self.p3)[index]
-
-    def __iter__(self):
-        """
-        Returns an iterator over the points of the plane
-        """
-        yield from (self.p1, self.p2, self.p3)
-
-    def __setitem__(self, index: int, value: Point):
-        """
-        Sets the point at the specified index
-
-        Args:
-        - `index` (int): Index of the point (0, 1, or 2)
-        - `value` (Point): The new value of the point
-        """
-        if 0 <= index <=2:
-            setattr(self, ['p1', 'p2', 'p3'][index], value)
-        else:
-            raise IndexError("Index out of range")
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        PROPERTY                                  ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
     @property
     def normal(self) -> Vector3:
-        """
-        Calculates and returns the normal vector of the plane
-        """
-        return (self.p1 - self.p2).cross(self.p3 - self.p2)
+        """Calculates and caches the normal vector of the plane"""
+        if self._normal is None:
+            self._normal = (self.p1 - self.p2).cross(self.p3 - self.p2)
+        return self._normal
 
     @property
     def d(self) -> float:
-        """
-        Calculates and returns the distance of the plane from the origin
-        """
-        return -self.normal.dot(self.p1.as_vector())
-
+        """Calculates and caches the distance of the plane from the origin"""
+        if self._d is None:
+            self._d = -self.normal.dot(self.p1.as_vector())
+        return self._d
+    
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        METHODS                                   ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+    
     def collinear_points(self) -> bool:
-        """
-        Checks if the plane points are collinear
-        """
+        """Checks if the plane points are collinear"""
         ab = self.p2 - self.p1
         ac = self.p3 - self.p1
         return ab.cross(ac).is_null()
 
     def distance_to_point(self, point: Point) -> float:
-        """
-        Calculates the distance from the plane to a point
-
-        Args:
-        - `point` (Point): The point to calculate the distance to
-        """
+        """Calculates the distance from the plane to a point"""
         return abs(self.normal.dot(point.as_vector()) + self.d) / self.normal.length()
 
     def point_in_front(self, point: Point, threshold=1e-4) -> bool:
-        """
-        Checks if a point is in front of the plane
-
-        Args:
-        - `point` (Point): The point to check
-        - `threshold` (float): Tolerance for considering the point in front
-        """
+        """Checks if a point is in front of the plane"""
         return self.normal.dot(point - self.p1) > threshold
 
     def point_behind(self, point: Point, threshold=-1e-4) -> bool:
-        """
-        Checks if a point is behind the plane
-
-        Args:
-        - `point` (Point): The point to check
-        - `threshold` (float): Tolerance for considering the point behind
-        """
+        """Checks if a point is behind the plane"""
         return self.normal.dot(point - self.p1) < threshold
 
     def point_on_plane(self, point: Point, threshold: float = 1e-4) -> bool:
-        """
-        Checks if a point is on the plane.
-
-        Args:
-        - `point` (Point): The point to check.
-        - `threshold` (float): Tolerance for considering the point on the plane.
-        """
+        """Checks if a point is on the plane"""
         distance_to_plane = abs(self.normal.dot(point.as_vector()) + self.d)
         return distance_to_plane < threshold
+    
+    def is_parallel(self, other) -> bool:
+        return is_parallel(self, other)
+
+    def is_perpendicular(self, other) -> bool:
+        return is_perpendicular(self, other)
+    
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                        DUNDER METHODS                            ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    def __repr__(self):
+        return f"{self.p1} {self.p2} {self.p3}"
+
+    def __getitem__(self, index: int) -> Point:
+        """Gets the point at the specified index"""
+        return (self.p1, self.p2, self.p3)[index]
+
+    def __iter__(self):
+        """Returns an iterator over the points of the plane"""
+        return iter((self.p1, self.p2, self.p3))
 
 def get_intersection(plane1: Plane, plane2: Plane, plane3: Plane) -> Union[Point, None]:
-    """
-    Calculates the intersection point of three planes
-
-    Args:
-    - `plane1` (Plane): The first plane
-    - `plane2` (Plane): The second plane
-    - `plane3` (Plane): The third plane
-    """
+    """Calculates the intersection point of three planes"""
     n1, d1 = plane1.normal, plane1.d
     n2, d2 = plane2.normal, plane2.d
     n3, d3 = plane3.normal, plane3.d
