@@ -28,7 +28,7 @@ class Face:
         self.id: int = 0
         self.plane: Plane = plane
         self.texture: Texture = texture
-        self.vertices: list[Point] = []
+        self._vertices: list[Point] = []
         self.edges: list[Edge] = []
         #      self.width and self.heigth useful for justify texture? Need wad parser
 
@@ -44,19 +44,24 @@ class Face:
     def texture_normal(self) -> Vector3:
         """Returns the normal vector of the face's texture"""
         return self.texture.u_axis.cross(self.texture.v_axis).normalize()
-    
 
+    @property
+    def vertices(self):
+        if not self._vertices:
+            raise NotImplementedError("Before calling the face vertices property, you must call the brush vertices property.")
+        return self._vertices
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                         METHODS                                  ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     def centroid(self) -> Union[Point, None]:
         """Calculates the centroid of the face"""
         if not self.plane.collinear_points():
-            centroid_x = sum(point.x for point in self.plane) / 3
-            centroid_y = sum(point.y for point in self.plane) / 3
-            centroid_z = sum(point.z for point in self.plane) / 3
+            if self._vertices:
+                centroid_x = sum(vertex.x for vertex in self._vertices) / 3
+                centroid_y = sum(vertex.y for vertex in self._vertices) / 3
+                centroid_z = sum(vertex.z for vertex in self._vertices) / 3
 
-            return Point(centroid_x, centroid_y, centroid_z)
+                return Point(centroid_x, centroid_y, centroid_z)
         return None
     
     def copy(self) -> 'Face':
@@ -126,7 +131,7 @@ class Face:
 
     def _add_vertex(self, vertex: Point):
         """Add a vertex to the face"""
-        self.vertices.append(vertex)
+        self._vertices.append(vertex)
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
