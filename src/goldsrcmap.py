@@ -13,6 +13,7 @@ from utils.math.point import Point
 from utils.math.vector import Vector3
 from utils.math.plane import Plane
 from utils.math.edge import Edge
+from utils.math.geometry_utils import *
 
 from utils.brushgenerator import BrushGenerator
 from utils.entitygenerator import EntityGenerator
