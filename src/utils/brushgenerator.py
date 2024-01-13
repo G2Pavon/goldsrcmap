@@ -112,9 +112,9 @@ class BrushGenerator():
                             z + radius * math.cos(phi1))
 
                 u0 = theta / theta_segments
-                u1 = (theta + 1) / theta_segments
+                #u1 = (theta + 1) / theta_segments
                 v0 = phi / phi_segments
-                v1 = (phi + 1) / phi_segments
+                #v1 = (phi + 1) / phi_segments
                 
                 face = Face(Plane(p00, p01, p11), lst_textures[0])
                 face.texture.u_axis, face.texture.v_axis = Vector3(1, 0, 0), Vector3(0, -1, 0)
@@ -125,7 +125,7 @@ class BrushGenerator():
                 face = Face(Plane(p00, p11, p10), lst_textures[1])
                 face.texture.u_axis, face.texture.v_axis = Vector3(1, 0, 0), Vector3(0, -1, 0)
                 face.texture.u_offset, face.texture.v_offset = u0, v0
-                face.texture.u_scale, face.texture.v_scale = (u1 - u0), (v1 - v0)
+                face.texture.u_scale, face.texture.v_scale = 1, 1 #(u1 - u0), (v1 - v0)
                 faces.append(face)
 
         brush = Brush()
