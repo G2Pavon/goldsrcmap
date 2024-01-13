@@ -166,6 +166,8 @@ class Brush:
 
     def _get_vertices(self) -> list[Point]:
         """Return the vertices of the brush"""
+        #https://github.com/stefanha/map-files/blob/master/MAPFiles.pdf
+        
         brush_vertices = []
 
         for i in range(len(self.faces) - 2):
@@ -207,10 +209,10 @@ class Brush:
                 for m in range(n + 1, len(vertices)):
                     if not p.point_behind(face._vertices[m]):
                         b = (face._vertices[m] - center).normalized()
-                        Angle = a.dot(b)
+                        angle = a.dot(b)
 
-                        if Angle > smallest_angle:
-                            smallest_angle = Angle
+                        if angle > smallest_angle:
+                            smallest_angle = angle
                             smallest = m
 
                 face._vertices[n + 1], face._vertices[smallest] = face._vertices[smallest], face._vertices[n + 1]
