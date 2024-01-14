@@ -94,11 +94,18 @@ class Map:
                     self.entities.append(entity)
                 else:
                     raise TypeError(f"Expected <class {Entity.__name__}> but got {type(entity).__name__}")
-              
+
     def copy(self):
         """Return a deepcopy of the current map instance, useful for backup"""
         return deepcopy(self)
     
+    def get_entity_by_brush(self, target_brush: Brush) -> Union[Entity, None]:
+        """Return the parent entity of the brush"""
+        for entity in self.entities:
+            if target_brush in entity.brushes:
+                return entity
+        return None
+
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        DUNDER METHODS                            ┃
