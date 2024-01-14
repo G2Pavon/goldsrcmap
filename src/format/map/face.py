@@ -21,7 +21,8 @@ class Face:
       id (int): The unique identifier for the face.
       plane (Plane): The Plane that compose the face.
       texture (Texture): The texture definition
-      vertices (list[Point]): List of vertices
+      _vertices (list[Point]): List of vertices ordered in clockwise
+      _edges (list[Edge]): List of edges
     """
 
     def __init__(self, plane: Plane, texture: Texture):
@@ -29,8 +30,9 @@ class Face:
         self.plane: Plane = plane
         self.texture: Texture = texture
         self._vertices: list[Point] = []
-        self.edges: list[Edge] = []
-        #      self.width and self.heigth useful for justify texture? Need wad parser
+        self._edges: list[Edge] = []
+        #self.width and self.heigth useful for justify texture? Need wad parser
+
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        PROPERTY                                  ┃
@@ -48,8 +50,15 @@ class Face:
     @property
     def vertices(self):
         if not self._vertices:
-            raise NotImplementedError("Before calling the face vertices property, you must call the brush vertices property.")
+            raise ValueError("Before calling the face vertices property, you must call the brush vertices property.")
         return self._vertices
+    
+    @property
+    def edges(self):
+        if not self._edges:
+            self._edges = self._get_edges()
+        return self._edges
+
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                         METHODS                                  ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -132,6 +141,19 @@ class Face:
     def _add_vertex(self, vertex: Point):
         """Add a vertex to the face"""
         self._vertices.append(vertex)
+
+    def _get_edges(self):
+        """Compute the edges of the face based on its vertices"""
+        if not self._vertices:
+            raise ValueError("Vertices must be set before calculating edges.")
+
+        num_vertices = len(self._vertices)
+        if num_vertices < 3:
+            raise ValueError("At least 3 vertices are required to form a face.")
+
+        edges = [Edge(self._vertices[i], self._vertices[(i + 1) % num_vertices]) for i in range(num_vertices)]
+        return edges
+
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
