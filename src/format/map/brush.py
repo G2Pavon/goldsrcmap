@@ -2,7 +2,6 @@ from copy import deepcopy
 from typing import Optional, Union
 
 from format.map.face import Face
-from format.map.texture import Texture
 
 from utils.math.vector import Vector3
 from utils.math.point import Point
@@ -82,17 +81,6 @@ class Brush:
 
         return Point(centroid_x, centroid_y, centroid_z)
     
-    def collide_with(self, other: 'Brush') -> bool:
-        """Check if the current brush collides with another brush"""
-        # lazy implementation, not tested 
-        for vertex in self.vertices:
-            if other.is_point_inside(vertex):
-                return True
-        for vertex in other.vertices:
-            if self.is_point_inside(vertex):
-                return True
-        return False
-    
     def copy(self) -> 'Brush':
         """Create a deep copy of the brush"""
         return deepcopy(self)
@@ -167,7 +155,7 @@ class Brush:
     def _get_vertices(self) -> list[Point]:
         """Return the vertices of the brush"""
         #https://github.com/stefanha/map-files/blob/master/MAPFiles.pdf
-        
+
         brush_vertices = []
 
         for i in range(len(self.faces) - 2):
