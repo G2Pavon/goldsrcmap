@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union, Tuple
+from typing import Union
 
 from utils.math.point import Point
 from utils.math.vector import Vector3
@@ -50,7 +50,7 @@ class Edge:
         if not self._length:
             self._length = (self.end - self.start).length()
         return self._length
-    
+
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        METHODS                                   ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -72,118 +72,53 @@ class Edge:
         """Check if this edge is similar to another edge"""
         return self.start.is_near(other.start) and self.end.is_near(other.end)
 
-    def distance_to_edge(self: 'Edge', other: 'Edge', clampAll=True, clamp_self_start=False, clamp_self_end=False, clamp_other_start=False, clamp_other_end=False):
-        """Return the closest points on each line segment, their distance, and delta distances (dx, dy, dz)
-        https://stackoverflow.com/a/18994296
-
-        clampAll = True: Closest points can not go beyond the actual edges segments
-        clamAll = False: Closest points is outside the edge segment
-        TODO: test in all scenarios
-        """
+    def distance_to_edge(self, other: 'Edge'):
+        """Return the shortest distance and closest points between two edges"""
         epsilon = 1e-6
-        if clampAll:
-            clamp_self_start = True
-            clamp_self_end = True
-            clamp_other_start = True
-            clamp_other_end = True
 
-        # Direction vectors A and B between the endpoints of the two edges
-        A = self.end - self.start
-        B = other.end - other.start
-        # Edges length
-        lengthA = A.length()
-        lengthB = B.length()
+        direction_self = self.end - self.start
+        direction_other = other.end - other.start
 
-        A_normalized = A / lengthA
-        B_normalized = B / lengthB
+        length_self_squared = direction_self.square_length()
+        length_other_squared = direction_other.square_length()
 
-        cross = A_normalized.cross(B_normalized)
-        denom = (cross.length())**2
+        if length_self_squared < epsilon and length_other_squared < epsilon:
+            return ((other.start - self.start).length(), self.start, other.start)
 
-        # If lines are parallel (denom=0) test if lines overlap
-        # If they don't overlap then there is a closest point solution
-        # If they do overlap, there are infinite closest positions, but there is a closest distance
-        if denom < epsilon:
-            # Project the vector that joins both beginnings of the edges in the direction of self
-            d0 = A_normalized.dot(other.start - self.start)
+        relative_start = self.start - other.start
+        dot_product = direction_other.dot(relative_start)
 
-            # Overlap only possible with clamping
-            if clamp_self_start or clamp_self_end or clamp_other_start or clamp_other_end:
-                # Project the vector that joins self start and other end in the direction of self
-                d1 = A_normalized.dot(other.end - self.start)
+        if length_self_squared < epsilon:
+            s = 0
+            t = min(max(dot_product / length_other_squared, 0), 1)
+        else:
+            dot_relative_start = direction_self.dot(relative_start)
 
-                # Is segment B before A?
-                if d0 <= epsilon and 0 >= d1:
-                    if clamp_self_start and clamp_other_end:
-                        if abs(d0) < abs(d1):
-                            # Closest points are self.start and other.start
-                            distance = (self.start - other.start)
-                            return self.start, other.start, distance.length(), distance.components()
-                        # Closest points are self.start and other.end
-                        distance = (self.start - other.end)
-                        return self.start, other.end, distance.length(), distance.components()
+            if length_other_squared <= epsilon:
+                t = 0
+                s = min(max(-dot_relative_start / length_self_squared, 0), 1)
+            else:
+                dot_directions = direction_self.dot(direction_other)
+                denom = length_self_squared * length_other_squared - dot_directions ** 2
 
-                # Is segment B after A?
-                elif d0 >= lengthA - epsilon and 0 <= d1:
-                    if clamp_self_end and clamp_other_start:
-                        if abs(d0) < abs(d1):
-                            # Closest points are self.end and other.start
-                            distance = (self.end - other.start)
-                            return self.end, other.start, distance.length(), distance.components()
-                        # Closest points are self.end and other.end
-                        distance = (self.end - other.end)
-                        return self.end, other.end, distance.length(), distance.components()
+                if denom != 0:
+                    s = min(max((dot_directions * dot_product - dot_relative_start * length_other_squared) / denom, 0), 1)
+                else:
+                    s = 0
 
-            # Segments overlap, return distance between parallel segments
-            distance =  ((self.start + (d0 * A_normalized)) - other.start)
-            return None, None, distance.length(), distance.components()
+                t = (dot_directions * s + dot_product) / length_other_squared
+                if t < 0:
+                    t = 0
+                    s = min(max(-dot_relative_start / length_self_squared, 0), 1)
+                elif t > 1:
+                    t = 1
+                    s = min(max((dot_directions - dot_relative_start) / length_self_squared, 0), 1)
 
-        # Skew lines: Calculate the projected closest points
-        t = (other.start - self.start) # Vector between the starting points of the two edges
+        closest_point_self = self.start + s * direction_self
+        closest_point_other = other.start + t * direction_other
 
-        detA = Matrix3x3(t.components(), B_normalized.components(), cross.components()).det()
-        detB = Matrix3x3(t.components(), A_normalized.components(), cross.components()).det()
+        return ((closest_point_other - closest_point_self).length(), closest_point_self, closest_point_other)
 
-        t0 = detA / denom
-        t1 = detB / denom
-
-        point_on_self = self.start + (A_normalized * t0)  # Projected closest point on self
-        point_on_other = other.start + (B_normalized * t1)  # Projected closest point on other
-
-        # Clamp projections
-        if clamp_self_start or clamp_self_end or clamp_other_start or clamp_other_end:
-            # Clamp projection self
-            if clamp_self_start and t0 < epsilon:
-                point_on_self = self.start
-            elif clamp_self_end and t0 > lengthA - epsilon:
-                point_on_self = self.end
-
-            # Clamp projection other
-            if clamp_other_start and t1 < epsilon:
-                point_on_other = other.start
-            elif clamp_other_end and t1 > lengthB - epsilon:
-                point_on_other = other.end
-
-            # Clamp projection self
-            if (clamp_self_start and t0 < epsilon) or (clamp_self_end and t0 > lengthA - epsilon):
-                dot = B_normalized.dot(point_on_self - other.start)
-                if clamp_other_start and dot < epsilon:
-                    dot = epsilon
-                elif clamp_other_end and dot > lengthB - epsilon:
-                    dot = lengthB - epsilon
-                point_on_other = other.start + (B_normalized * dot)
-
-            # Clamp projection other
-            if (clamp_other_start and t1 < epsilon) or (clamp_other_end and t1 > lengthB - epsilon):
-                dot = A_normalized.dot(point_on_other - self.start)
-                if clamp_self_start and dot < epsilon:
-                    dot = epsilon
-                elif clamp_self_end and dot > lengthA - epsilon:
-                    dot = lengthA - epsilon
-                point_on_self = self.start + (A_normalized * dot)
-
-        distance = (point_on_self - point_on_other)
-        return point_on_self, point_on_other, distance.length(), distance.components()
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        DUNDER METHODS                            ┃
