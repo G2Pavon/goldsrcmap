@@ -34,14 +34,14 @@ class Edge:
     def direction1(self) -> Vector3:
         """Get the direction vector from start to end"""
         if not self._direction:
-            self._direction = (self.end - self.start).normalize()
+            self._direction = (self.end - self.start)
         return self._direction
 
     @property
     def direction2(self) -> Vector3:
         """Get the direction vector from end to start"""
         if not self._invdirection:
-            self._invdirection = (self.start - self.end).normalize()
+            self._invdirection = (self.start - self.end)
         return self._invdirection
 
     @property
@@ -71,34 +71,38 @@ class Edge:
     def similar_to(self, other: 'Edge') -> bool:
         """Check if this edge is similar to another edge"""
         return self.start.is_near(other.start) and self.end.is_near(other.end)
+    
+    def distance_to_point(self, point: Point):
+        """Return the shortest distance and closest points between edge and point"""
+        t = (point - self.start).dot(self.direction1) / (self.direction1).dot(self.direction1)
+        t = min(max(t, 0), 1)
+        closest_edge_point = self.start + t * self.direction1
+        return (point - closest_edge_point).length(), closest_edge_point
 
     def distance_to_edge(self, other: 'Edge'):
         """Return the shortest distance and closest points between two edges"""
         epsilon = 1e-6
 
-        direction_self = self.end - self.start
-        direction_other = other.end - other.start
-
-        length_self_squared = direction_self.square_length()
-        length_other_squared = direction_other.square_length()
+        length_self_squared = self.direction1.square_length()
+        length_other_squared = other.direction1.square_length()
 
         if length_self_squared < epsilon and length_other_squared < epsilon:
             return ((other.start - self.start).length(), self.start, other.start)
 
         relative_start = self.start - other.start
-        dot_product = direction_other.dot(relative_start)
+        dot_product = other.direction1.dot(relative_start)
 
         if length_self_squared < epsilon:
             s = 0
             t = min(max(dot_product / length_other_squared, 0), 1)
         else:
-            dot_relative_start = direction_self.dot(relative_start)
+            dot_relative_start = self.direction1.dot(relative_start)
 
             if length_other_squared <= epsilon:
                 t = 0
                 s = min(max(-dot_relative_start / length_self_squared, 0), 1)
             else:
-                dot_directions = direction_self.dot(direction_other)
+                dot_directions = self.direction1.dot(other.direction1)
                 denom = length_self_squared * length_other_squared - dot_directions ** 2
 
                 if denom != 0:
@@ -114,18 +118,18 @@ class Edge:
                     t = 1
                     s = min(max((dot_directions - dot_relative_start) / length_self_squared, 0), 1)
 
-        closest_point_self = self.start + s * direction_self
-        closest_point_other = other.start + t * direction_other
+        closest_point_self = self.start + s * self.direction1
+        closest_point_other = other.start + t * other.direction1
 
-        return ((closest_point_other - closest_point_self).length(), closest_point_self, closest_point_other)
-
+        return (closest_point_other - closest_point_self).length(), closest_point_self, closest_point_other
+    
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        DUNDER METHODS                            ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     def __repr__(self) -> str:
         """Get a string representation of the edge"""
-        return f"Edge: ({self.start}; {self.end}), Length: {self.length}, Half-edges: [{self.direction1}; {self.direction2}]"
+        return f"Edge: {self.start}<---{self.length}---> {self.end}"
 
     def __str__(self) -> str:
         """Get a string representation of the edge"""
