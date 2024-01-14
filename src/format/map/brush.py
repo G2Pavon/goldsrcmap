@@ -88,13 +88,6 @@ class Brush:
     def has_texture(self, name: str, exact: bool = True) -> bool:
         """Check if any brush face has a specific texture"""
         return any(face.has_texture(name, exact) for face in self)
-    
-    def is_point_inside(self, point: Point) -> bool:
-        """Check if a given point is inside the brush"""
-        for face in self.faces:
-            if face.plane.normal.dot(point.as_vector()) + face.plane.d > 0:
-                return False
-        return True
 
     def move_by(self, x: float, y: float, z: float):
         """Moves the brush by a specified offsets"""
