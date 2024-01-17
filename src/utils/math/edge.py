@@ -3,7 +3,6 @@ from typing import Union
 
 from utils.math.point import Point
 from utils.math.vector import Vector3
-from utils.math.matrix import Matrix3x3
 
 
 @dataclass
@@ -61,11 +60,11 @@ class Edge:
         return mid
 
     def is_parallel(self, other: 'Edge') -> bool:
-        """Check if this edge is parallel to another edge, vector or plane"""
-        return self.direction1.is_perpendicular(other.direction1)
+        """Check if this edge is parallel to another edge"""
+        return self.direction1.is_parallel(other.direction1)
 
     def is_perpendicular(self, other: 'Edge') -> bool:
-        """Check if this edge is perpendicular to another edge, vector or plane"""
+        """Check if this edge is perpendicular to another edge"""
         return self.direction1.is_perpendicular(other.direction1)
 
     def similar_to(self, other: 'Edge') -> bool:
