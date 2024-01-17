@@ -28,11 +28,12 @@ class MapWriter:
                     self.write_properties(f, entity)
                     
                     for brush in entity.brushes:
-                        f.write(f'// brush {brush.id}\n')
-                        f.write('{\n')
-                        for face in brush.faces:
-                            self.write_face(f, face)
-                        f.write('}\n')
+                        if brush.faces:
+                            f.write(f'// brush {brush.id}\n')
+                            f.write('{\n')
+                            for face in brush.faces:
+                                self.write_face(f, face)
+                            f.write('}\n')
                     f.write('}\n')
         print('Saved')
 
