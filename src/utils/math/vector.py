@@ -39,12 +39,13 @@ class Vector3:
         self.x *= inv_length
         self.y *= inv_length
         self.z *= inv_length
+        return self
 
     def normalized(self) -> 'Vector3':
         """Returns a normalized version of the vector"""
         length = self.length()
         if length == 0:
-            raise ValueError("Cannot normalize a zero-length vector.")
+            return 0
         return Vector3(self.x / length, self.y / length, self.z / length)
 
     def dot(self, other: 'Vector3') -> float:
@@ -72,7 +73,9 @@ class Vector3:
     def is_parallel(self, other: 'Vector3', threshold: float = 1e-4) -> bool:
         """Checks if the vector is parallel to another vector"""
         if isinstance(other, Vector3):
-            return abs(abs(self.dot(other)) - 1) < threshold
+            dot_product = self.dot(other)
+            magnitude_product = self.length() * other.length()
+            return abs(dot_product - magnitude_product) < threshold
         else:
             raise TypeError(f"Unsupported type for parallel check: {type(other)}")
 
