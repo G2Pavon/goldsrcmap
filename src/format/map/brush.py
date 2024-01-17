@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Optional, Union
+from typing import Optional, Union, Iterator
 
 from format.map.face import Face
 
@@ -9,7 +9,8 @@ from utils.math.plane import Plane, get_intersection
 
 class Brush:
     """
-    Represents a brush defined by a list of faces
+    Represents a brush defined by a list of faces.
+    A brush is convex polyhedron defined by the intersection of half-spaces.
 
     Attributes:
     - id (int): The unique identifier for the brush.
@@ -31,18 +32,28 @@ class Brush:
 # ┃                        PROPERTY                                  ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     @property
-    def vertices(self):
-        """Get a list of vertices associated with the brush"""
+    def vertices(self) -> list[Point]:
+        """Get a list of vertices of the brush"""
         if not self._vertices:
             self._vertices = self._get_vertices()
         return self._vertices
     
     @property
-    def origin(self):
+    def origin(self) -> Point:
         """Get the origin (centroid) of the brush"""
         if self._origin is None:
             self._origin = self.centroid()
         return self._origin
+
+    @property
+    def edges(self):# -> list:
+        """Get a list of edges of the brush"""
+        edges =[]
+        self.vertices
+        for face in self:
+            face.vertices
+            edges.extend(face.edges)
+        return edges
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -159,7 +170,7 @@ class Brush:
 
                 for k in range(j, len(self.faces)):
                     plane_k = self.faces[k].plane
-
+                    # Point of intersection
                     vertex = get_intersection(plane_i, plane_j, plane_k)
                     if vertex:
                         legal = True
@@ -177,6 +188,7 @@ class Brush:
                             self.faces[k]._add_vertex(vertex)
                             brush_vertices.append(vertex)
 
+        # Sorting vertices clockwise
         for face in self.faces:
             vertices = face._vertices
             center = face.centroid()
@@ -204,10 +216,10 @@ class Brush:
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        DUNDER METHODS                            ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-    def __repr__(self): 
+    def __repr__(self) -> str: 
         """Return a string representation of the brush"""
         return f'{self.faces}'
     
-    def __iter__(self): 
+    def __iter__(self) -> Iterator[Face]: 
         """Return an iterator over the faces of the brush"""
         return iter(self.faces)
