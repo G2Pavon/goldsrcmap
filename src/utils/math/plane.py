@@ -44,9 +44,13 @@ class Plane:
         ab = self.p2 - self.p1
         ac = self.p3 - self.p1
         return ab.cross(ac).is_null()
+    
+    def distance_between_planes(self, other: 'Plane') -> float:
+        """Calculates the distance between two planes"""
+        return abs(self.d - other.d) / self.normal.length() if self.is_parallel(other) else 0
 
     def distance_to_point(self, point: Point) -> float:
-        """Calculates the distance from the plane to a point"""
+        """Calculates the distance between the plane and a point"""
         return abs(self.normal.dot(point.as_vector()) + self.d) / self.normal.length()
 
     def point_in_front(self, point: Point, threshold=1e-4) -> bool:
