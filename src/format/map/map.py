@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Iterator
 from copy import deepcopy
 
 from format.map.entity import Entity
@@ -67,7 +67,7 @@ class Map:
         if self.entities:
             if self.entities[0].classname == 'worldspawn':
                 return self.entities[0]
-            raise ValueError(f"Worldspawn entity not found. There is something wrong with the map")
+            raise ValueError("Worldspawn entity not found. There is something wrong with the map")
         return None
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -105,6 +105,10 @@ class Map:
             if target_brush in entity.brushes:
                 return entity
         return None
+    
+    def get_entity_by_class(self, name: str) -> list[Entity]:
+        """Return a list of entities based in classname"""
+        return [entity for entity in self.entities if entity.classname == name]
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -114,6 +118,6 @@ class Map:
         """Return a string representation of the map."""
         return f"{self.entities}"
     
-    def __iter__(self): 
+    def __iter__(self) -> Iterator[Entity]: 
         """Return an iterator over the Map entities"""
         return iter(self.entities)
