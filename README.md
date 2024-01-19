@@ -4,28 +4,9 @@ Python module to manipulate goldsrc engine .map files
 
 work in progress...
 
-# Installation
-
-~~pip install goldsrcmap~~ *not implemented*
-
-Add `src` content to your working directory
-e.g. `/Mapping/Scripting/`:
-```
-/Mapping/Scripting/format
-/Mapping/Scripting/utils
-/Mapping/Scripting/__init__.py
-/Mapping/Scripting/goldsrcmap.py
-```
-
-
-Now create scripts inside `/Scripting/`
-```
-/Mapping/Scripting/your_script.py
-```
-
 # Usage
 
-~~Documentation~~ *not implemented*
+https://github.com/G2Pavon/goldsrcmap/wiki
 
 Load map:
 ```Python
@@ -94,16 +75,6 @@ m.add_entity(button)
 # Save the new map in cstrike
 gsm.save_map(m, 'cstrike/maps/generated.map')
 ```
----------
-
-Documentation
-
-
----------
-# References:
-
-https://developer.valvesoftware.com/wiki/MAP_(file_format)
-
 https://github.com/stefanha/map-files/blob/master/MAPFiles.pdf
 
 https://github.com/surf-gorange/PyVMF
