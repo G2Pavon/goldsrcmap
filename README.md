@@ -1,6 +1,6 @@
 # goldsrcmap
 ---------
-Python module to manipulate goldsrc engine .map files
+Python library to manipulate goldsrc engine .map files
 
 work in progress...
 
