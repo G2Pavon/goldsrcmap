@@ -75,7 +75,4 @@ m.add_entity(button)
 # Save the new map in cstrike
 gsm.save_map(m, 'cstrike/maps/generated.map')
 ```
-https://github.com/stefanha/map-files/blob/master/MAPFiles.pdf
-
-https://github.com/surf-gorange/PyVMF
 
