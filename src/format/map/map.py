@@ -24,9 +24,8 @@ class Map:
 
         #Create from scratch
         if not self.name:
-            world = Entity()
-            world.properties = {
-                "classname": "worldspawn",
+            self.add_entity(Entity('worldspawn', [0,0,0], 
+                {
                 "mapversion": "220",           # Valve220 texture projection
                 "wad": "",                     # Wad path
                 "message": "",                 # Map Description/Title
@@ -34,9 +33,9 @@ class Map:
                 "light": 0,                    # Default light level
                 "WaveHeight": "",              # Default Wave Height
                 "MaxRange": "4096",            # Max viewable distance
-                "origin": "0 0 0",
-            }
-            self.add_entity(world)
+                }
+                )
+            )
     
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        PROPERTY                                  ┃
