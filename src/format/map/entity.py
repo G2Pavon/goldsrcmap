@@ -132,10 +132,8 @@ class Entity:
 
     def __iter__(self):
         """Return an iterator over the entity's brushes"""
-        if self.is_brush_entity:
-            yield from (self.brushes)
-        elif self['classname'] == 'worldspawn':
-            yield from (self.brushes)
+        if self.is_brush_entity or self['classname'] == 'worldspawn':
+            iter(self.brushes)
         
     def __setitem__(self, key: str, value: str) -> None:
         """Set an item in the entity's property dictionary"""
