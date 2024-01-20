@@ -15,11 +15,29 @@ class Entity:
         id (int): Unique identifier for the entity.
         brush_counter (int): Counter for assigning unique IDs to brushes.
     """
-    def __init__(self):
+    def __init__(self, classname: Union[str, None]=None, origin_or_brushes: Union[Point, List[float], Brush, List[Brush], None]=None, properties: Union[dict, None]=None):
+        self._id: int = 0
         self.properties: dict = {}
         self.brushes: List[Brush] = []
-        self._id: int = 0
-        self.brush_counter: int = 0
+        self.brush_counter: int = 1
+        
+        # TODO: Remove default values for 'classname' and 'origin_or_brushes' parameters to make them required during entity initialization. 
+        # Requirements: Refactor load_map()
+        if classname:
+            self['classname'] = classname
+        
+        if isinstance(origin_or_brushes, Point):
+            self['origin'] = f'{origin_or_brushes.x} {origin_or_brushes.y} {origin_or_brushes.z}'
+        elif isinstance(origin_or_brushes, list) and len(origin_or_brushes)==3 and all(isinstance(i, (int, float)) for i in origin_or_brushes):
+            self['origin'] = f'{origin_or_brushes[0]} {origin_or_brushes[1]} {origin_or_brushes[2]}'
+        elif isinstance(origin_or_brushes, Brush):
+            self.add_brush(origin_or_brushes)
+        elif isinstance(origin_or_brushes, list) and all(isinstance(brush, Brush) for brush in origin_or_brushes):
+            self.add_brush(*origin_or_brushes)
+        if properties is not None:
+            for k, v in properties.items():
+                self.properties[k] = v
+
         self.in_map_instance = False
 
 
