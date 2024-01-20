@@ -121,3 +121,11 @@ class Map:
     def __iter__(self) -> Iterator[Entity]: 
         """Return an iterator over the Map entities"""
         return iter(self.entities)
+    
+    def __contains__(self, obj: Union[Entity, Brush]) -> bool:
+        """Check if an Entity or Brush instance is in Map"""
+        if isinstance(obj, Entity):
+            return any(entity == obj for entity in self.entities)
+        elif isinstance(obj, Brush):
+            return any(brush == obj for brush in self.brushes)
+        return False
