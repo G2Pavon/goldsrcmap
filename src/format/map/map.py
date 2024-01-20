@@ -89,9 +89,10 @@ class Map:
             ent_list = arg if isinstance(arg, list) else [arg]
             for entity in ent_list:
                 if isinstance(entity, Entity):
-                    entity.id = self.entity_counter
+                    entity._id = self.entity_counter
                     self.entity_counter += 1
                     self.entities.append(entity)
+                    entity.in_map_instance = True
                 else:
                     raise TypeError(f"Expected <class {Entity.__name__}> but got {type(entity).__name__}")
 

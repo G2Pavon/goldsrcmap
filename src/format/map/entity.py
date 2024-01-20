@@ -18,13 +18,20 @@ class Entity:
     def __init__(self):
         self.properties: dict = {}
         self.brushes: List[Brush] = []
-        self.id: int = 0
+        self._id: int = 0
         self.brush_counter: int = 0
+        self.in_map_instance = False
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        PROPERTY                                  ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+    @property
+    def id(self) -> int | None:
+        if not self.in_map_instance:
+            return None
+        return self._id
+    
     @property
     def classname(self) -> str:
         """Get the classname value of the entity."""
@@ -32,7 +39,7 @@ class Entity:
         if classname_value:
             return classname_value
         else:
-            raise ValueError(f"Entity N°{self.id}: 'classname' value not found")
+            raise ValueError(f"Entity N°{self._id}: 'classname' value not found")
 
     @property
     def origin(self) -> Union[Point, None]:
@@ -40,13 +47,13 @@ class Entity:
         if self.is_point_entity:
             origin_value = self['origin']
             if origin_value is None:
-                raise ValueError(f"Entity N°{self.id}: Origin not found")
+                raise ValueError(f"Entity N°{self._id}: Origin not found")
             
             try:
                 x, y, z = map(float, str(origin_value).split())
                 return Point(x, y, z)
             except ValueError:
-                raise ValueError(f'Entity N°{self.id}: Invalid origin format "{origin_value}"')
+                raise ValueError(f'Entity N°{self._id}: Invalid origin format "{origin_value}"')
 
         elif self.is_brush_entity:
             brush_origins = [brush.centroid() for brush in self.brushes]
@@ -58,14 +65,14 @@ class Entity:
     def is_point_entity(self) -> bool:
         """Check if the entity is a point entity"""
         if 'classname' not in self.properties:
-            raise KeyError(f"Entity N°{self.id}: key 'classname' not found")
+            raise KeyError(f"Entity N°{self._id}: key 'classname' not found")
         return self['classname'] == 'worldspawn' or not self.brushes
 
     @property
     def is_brush_entity(self) -> bool:
         """Check if the entity is a brush entity"""
         if 'classname' not in self.properties:
-            raise KeyError(f"Entity N°{self.id}: 'classname' not found")
+            raise KeyError(f"Entity N°{self._id}: 'classname' not found")
         return bool(self['classname'] != 'worldspawn' and self.brushes)
 
     @property
@@ -139,7 +146,7 @@ class Entity:
         try:
             return self.properties[key]
         except KeyError:
-            raise KeyError(f"Entity N°{self.id}: Property '{key}' not found in entity properties")
+            raise KeyError(f"Entity N°{self._id}: Property '{key}' not found in entity properties")
 
     def __contains__(self, key: str) -> bool:
         """Check if a key is present in the entity's property dictionary"""

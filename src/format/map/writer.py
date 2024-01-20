@@ -23,7 +23,7 @@ class MapWriter:
             f.write('// Format: Valve\n')
             for entity in self.map_instance:
                 if entity.properties:
-                    f.write(f'// entity {entity.id}\n')
+                    f.write(f'// entity {entity._id}\n')
                     f.write('{\n')
                     self.write_properties(f, entity)
                     
