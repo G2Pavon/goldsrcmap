@@ -115,7 +115,7 @@ class Entity:
             brush_list = arg if isinstance(arg, list) else [arg]
             for brush in brush_list:
                 if isinstance(brush, Brush):
-                    brush.id = self.brush_counter
+                    brush._id = self.brush_counter
                     self.brush_counter += 1
                     self.brushes.append(brush)
                 else:

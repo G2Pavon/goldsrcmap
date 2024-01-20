@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Optional, Union, Iterator
+from typing import Optional, Union, Iterator, List
 
 from format.map.face import Face
 
@@ -20,12 +20,20 @@ class Brush:
     - _origin (Optional[Point]): Cached centroid of the brush.
     """
 
-    def __init__(self):
-        self.id: int = 0
+    def __init__(self, faces: Union[List[Face], None]=None):
+        self._id: int = 0
         self.faces: list[Face] = []
         self.face_counter: int = 0
         self._vertices: list[Point] = []
         self._origin: Optional[Point] = None
+
+        if isinstance(faces, list):
+            if not len(faces) >= 4:
+                raise ValueError(f'Invalid number of faces, expected 4 or more but found {len(faces)}')
+            for face in faces:
+                if not isinstance(face, Face):
+                    raise TypeError(f'Excepted a list of Face instances but found {type(face)}: {face}')
+            self.add_face(faces)
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓

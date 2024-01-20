@@ -29,7 +29,7 @@ class MapWriter:
                     
                     for brush in entity.brushes:
                         if brush.faces:
-                            f.write(f'// brush {brush.id}\n')
+                            f.write(f'// brush {brush._id}\n')
                             f.write('{\n')
                             for face in brush.faces:
                                 self.write_face(f, face)
