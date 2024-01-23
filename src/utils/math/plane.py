@@ -45,7 +45,7 @@ class Plane:
         ac = self.p3 - self.p1
         return ab.cross(ac).is_null()
     
-    def distance_between_planes(self, other: 'Plane') -> float:
+    def distance_to_plane(self, other: 'Plane') -> float:
         """Calculates the distance between two planes"""
         return abs(self.d - other.d) / self.normal.length() if self.is_parallel(other) else 0
 
@@ -53,15 +53,15 @@ class Plane:
         """Calculates the distance between the plane and a point"""
         return abs(self.normal.dot(point.as_vector()) + self.d) / self.normal.length()
 
-    def point_in_front(self, point: Point, threshold=1e-4) -> bool:
+    def point_is_in_front(self, point: Point, threshold=1e-4) -> bool:
         """Checks if a point is in front of the plane"""
         return self.normal.dot(point - self.p1) > threshold
 
-    def point_behind(self, point: Point, threshold=-1e-4) -> bool:
+    def point_is_behind(self, point: Point, threshold=-1e-4) -> bool:
         """Checks if a point is behind the plane"""
         return self.normal.dot(point - self.p1) < threshold
 
-    def point_on_plane(self, point: Point, threshold: float = 1e-4) -> bool:
+    def point_is_in_plane(self, point: Point, threshold: float = 1e-4) -> bool:
         """Checks if a point is on the plane"""
         distance_to_plane = abs(self.normal.dot(point.as_vector()) + self.d)
         return distance_to_plane < threshold
@@ -71,6 +71,14 @@ class Plane:
 
     def is_perpendicular(self, other: 'Plane') -> bool:
         return self.normal.is_perpendicular(other.normal)
+
+    def project_point(self, point_to_project: Point) -> Point:
+        vector = point_to_project - self.p1
+        distance_from_plane = vector.dot(self.normal.normalized())
+        projection_on_normal = distance_from_plane * self.normal.normalized()
+        projection_on_plane = point_to_project - Point(*projection_on_normal)
+        return Point(*projection_on_plane)
+
     
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        DUNDER METHODS                            ┃
@@ -87,15 +95,16 @@ class Plane:
         """Returns an iterator over the points of the plane"""
         return iter((self.p1, self.p2, self.p3))
 
+
 def get_intersection(plane1: Plane, plane2: Plane, plane3: Plane) -> Union[Point, None]:
     """Calculates the intersection point of three planes"""
     n1, d1 = plane1.normal, plane1.d
     n2, d2 = plane2.normal, plane2.d
     n3, d3 = plane3.normal, plane3.d
-    denom = n1.dot(n2.cross(n3))
 
+    cross23 = n2.cross(n3)
+    denom = n1.dot(cross23)
     if denom == 0:
         return None
-
-    p = (-d1 * n2.cross(n3) - d2 * n3.cross(n1) - d3 * n1.cross(n2)) / denom
+    p = -(d1 * cross23 + d2 * n3.cross(n1) + d3 * n1.cross(n2)) / denom
     return Point(p.x, p.y, p.z)
