@@ -12,7 +12,7 @@ class Matrix3x3:
     """
 
     def __init__(self, row1: list[float], row2: list[float], row3: list[float]) -> None:
-        if (len(row1)  != 3 or len(row1)  != 3 or len(row1) != 3):
+        if len(row1)  != 3 or len(row1)  != 3 or len(row1) != 3:
             raise ValueError("Matrix must be 3x3")
 
         self.a11, self.a12, self.a13 = row1[0], row1[1], row1[2]
@@ -25,57 +25,48 @@ class Matrix3x3:
         
     @classmethod
     def rotation_x(cls, angle: float) -> 'Matrix3x3':
-        if isinstance(angle, (int, float)):
-            theta = radians(angle)
-            return cls([1, 0, 0],[0, cos(theta), -sin(theta)],[0, sin(theta), cos(theta)])
-        else:
+        if not isinstance(angle, (int, float)):
             raise TypeError(f"Unsupported type for angle: {type(angle)}")
+        theta = radians(angle)
+        return cls([1, 0, 0],[0, cos(theta), -sin(theta)],[0, sin(theta), cos(theta)])
     
     @classmethod
     def rotation_y(cls, angle: float) -> 'Matrix3x3':
-        if isinstance(angle, (int, float)):
-            theta = radians(angle)
-            return cls([cos(theta), 0, sin(theta)], [0, 1, 0], [-sin(theta), 0, cos(theta)])
-        else:
+        if not isinstance(angle, (int, float)):
             raise TypeError(f"Unsupported type for angle: {type(angle)}")
+        theta = radians(angle)
+        return cls([cos(theta), 0, sin(theta)], [0, 1, 0], [-sin(theta), 0, cos(theta)])
         
     @classmethod
     def rotation_z(cls, angle: float) -> 'Matrix3x3':
-        if isinstance(angle, (int, float)):
-            theta = radians(angle)
-            return cls([cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1])
-        else:
+        if not isinstance(angle, (int, float)):
             raise TypeError(f"Unsupported type for angle: {type(angle)}")
+        theta = radians(angle)
+        return cls([cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1])
 
     @classmethod
     def rotation_xyz(cls, phi: float, theta: float, psi: float) -> 'Matrix3x3':
-        if isinstance(phi, (int, float)):
-            if isinstance(theta, (int, float)):
-                if isinstance(psi, (int, float)):
-                    R = Matrix3x3.rotation_z(psi) @ Matrix3x3.rotation_y(theta) @ Matrix3x3.rotation_x(phi)
-                else:
-                    raise TypeError(f"Unsupported type for psi angle: {type(psi)}")
-            else:
-                raise TypeError(f"Unsupported type for theta angle: {type(theta)}")
-        else:
+        if not isinstance(phi, (int, float)):
             raise TypeError(f"Unsupported type for phi angle: {type(phi)}")
-        return R
+        if not isinstance(theta, (int, float)):
+            raise TypeError(f"Unsupported type for theta angle: {type(theta)}")
+        if not isinstance(psi, (int, float)):
+            raise TypeError(f"Unsupported type for psi angle: {type(psi)}")
+        return Matrix3x3.rotation_z(psi) @ Matrix3x3.rotation_y(theta) @ Matrix3x3.rotation_x(phi)
 
     @classmethod
     def rotate_around_axis(cls, angle: float, axis: Vector3) -> 'Matrix3x3':
-        if isinstance(angle, (int, float)):
-            angle = radians(angle)
-            c = cos(angle)
-            s = sin(angle)
-            C = 1 - c
-
-            x, y, z = axis.normalized().components()
-        else:
+        if not isinstance(angle, (int, float)):
             raise TypeError(f"Unsupported type for angle: {type(angle)}")
+        angle = radians(angle)
+        c = cos(angle)
+        s = sin(angle)
+        C = 1 - c
+        axis_x, axis_y, axis_z = axis.normalized().components()
 
-        return cls([c+x**2*C, x*y*C-z*s, x*z*C+y*s],
-                   [y*x*C+z*s, c+y**2*C, y*z*C-x*s], 
-                   [z*x*C-y*s, z*y*C+x*s, c+z**2*C])
+        return cls([c+axis_x**2*C           , axis_x*axis_y*C-axis_z*s, axis_x*axis_z*C+axis_y*s],
+                   [axis_y*axis_x*C+axis_z*s, c+axis_y**2*C           , axis_y*axis_z*C-axis_x*s], 
+                   [axis_z*axis_x*C-axis_y*s, axis_z*axis_y*C+axis_x*s, c+axis_z**2*C           ])
 
     @classmethod
     def reflection_xy(cls) -> 'Matrix3x3':
@@ -134,22 +125,27 @@ class Matrix3x3:
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
     def __mul__(self, scalar: float):
-        if isinstance(scalar, (int, float)):
-            a11, a12, a13 = self.a11 * scalar, self.a12 * scalar, self.a13 * scalar
-            a21, a22, a23 = self.a21 * scalar, self.a22 * scalar, self.a23 * scalar
-            a31, a32, a33 = self.a31 * scalar, self.a32 * scalar, self.a33 * scalar
-            return Matrix3x3([a11, a12, a13],[a21, a22, a23],[a31, a32, a33])
-        else:
+        if not isinstance(scalar, (int, float)):
             raise TypeError(f"Unsupported type for multiplication by a scalar: {type(scalar)}")
+    
+        a11, a12, a13 = self.a11 * scalar, self.a12 * scalar, self.a13 * scalar
+        a21, a22, a23 = self.a21 * scalar, self.a22 * scalar, self.a23 * scalar
+        a31, a32, a33 = self.a31 * scalar, self.a32 * scalar, self.a33 * scalar
+
+        return Matrix3x3([a11, a12, a13],
+                         [a21, a22, a23],
+                         [a31, a32, a33])
     
     __rmul__ = __mul__
         
     def __matmul__(self, other: Union[Vector3, 'Matrix3x3']) -> Union[Vector3, 'Matrix3x3']:
-        if isinstance(other, Vector3):
+        if not isinstance(other, (Vector3,Matrix3x3)):
+            raise TypeError(f"Unsupported type for matrix multiplication: {type(other)}")
+        elif isinstance(other, Vector3):
             x = self.a11 * other.x + self.a12 * other.y + self.a13 * other.z
             y = self.a21 * other.x + self.a22 * other.y + self.a23 * other.z
             z = self.a31 * other.x + self.a32 * other.y + self.a33 * other.z
-            return Vector3(x, y, z)
+            result = Vector3(x, y, z)
         
         elif isinstance(other, Matrix3x3):
             a11 = self.a11 * other.a11 + self.a12 * other.a21 + self.a13 * other.a31
@@ -164,7 +160,5 @@ class Matrix3x3:
             a32 = self.a31 * other.a12 + self.a32 * other.a22 + self.a33 * other.a32
             a33 = self.a31 * other.a13 + self.a32 * other.a23 + self.a33 * other.a33
 
-            result_matrix = Matrix3x3([a11, a12, a13], [a21, a22, a23], [a31, a32, a33])
-            return result_matrix
-        else:
-            raise TypeError(f"Unsupported type for matrix multiplication: {type(other)}")
+            result = Matrix3x3([a11, a12, a13], [a21, a22, a23], [a31, a32, a33])
+        return result
