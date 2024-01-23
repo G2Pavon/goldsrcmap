@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, Iterator
 
 from utils.math.vector import Vector3
 from utils.math.point import Point
@@ -47,36 +47,52 @@ class Plane:
     
     def distance_to_plane(self, other: 'Plane') -> float:
         """Calculates the distance between two planes"""
+        if not isinstance(other, Plane):
+            raise TypeError(f"Unsupported type for distance between plane to plane: {type(other)}")
         return abs(self.d - other.d) / self.normal.length() if self.is_parallel(other) else 0
 
-    def distance_to_point(self, point: Point) -> float:
+    def distance_to_point(self, other: Point) -> float:
         """Calculates the distance between the plane and a point"""
-        return abs(self.normal.dot(point.as_vector()) + self.d) / self.normal.length()
+        if not isinstance(other, Point):
+            raise TypeError(f"Unsupported type for distance between plane to point: {type(other)}")
+        return abs(self.normal.dot(other.as_vector()) + self.d) / self.normal.length()
 
-    def point_is_in_front(self, point: Point, threshold=1e-4) -> bool:
+    def point_is_in_front(self, other: Point, threshold=1e-4) -> bool:
         """Checks if a point is in front of the plane"""
-        return self.normal.dot(point - self.p1) > threshold
+        if not isinstance(other, Point):
+            raise TypeError(f"Unsupported type to check position relative to plane: {type(other)}")
+        return self.normal.dot(other - self.p1) > threshold
 
-    def point_is_behind(self, point: Point, threshold=-1e-4) -> bool:
+    def point_is_behind(self, other: Point, threshold=-1e-4) -> bool:
         """Checks if a point is behind the plane"""
-        return self.normal.dot(point - self.p1) < threshold
+        if not isinstance(other, Point):
+            raise TypeError(f"Unsupported type to check position relative to plane: {type(other)}")
+        return self.normal.dot(other - self.p1) < threshold
 
-    def point_is_in_plane(self, point: Point, threshold: float = 1e-4) -> bool:
+    def point_is_in_plane(self, other: Point, threshold: float = 1e-4) -> bool:
         """Checks if a point is on the plane"""
-        distance_to_plane = abs(self.normal.dot(point.as_vector()) + self.d)
+        if not isinstance(other, Point):
+            raise TypeError(f"Unsupported type to check position relative to plane: {type(other)}")
+        distance_to_plane = abs(self.normal.dot(other.as_vector()) + self.d)
         return distance_to_plane < threshold
     
     def is_parallel(self, other: 'Plane') -> bool:
+        if not isinstance(other, Plane):
+            raise TypeError(f"Unsupported type to check if planes are parallel: {type(other)}")
         return self.normal.is_parallel(other.normal)
 
     def is_perpendicular(self, other: 'Plane') -> bool:
+        if not isinstance(other, Plane):
+            raise TypeError(f"Unsupported type to check if planes are perpendicular: {type(other)}")
         return self.normal.is_perpendicular(other.normal)
 
-    def project_point(self, point_to_project: Point) -> Point:
-        vector = point_to_project - self.p1
+    def project_point(self, other: Point) -> Point:
+        if not isinstance(other, Point):
+            raise TypeError(f"Unsupported type to project in plane: {type(other)}")
+        vector = other - self.p1
         distance_from_plane = vector.dot(self.normal.normalized())
         projection_on_normal = distance_from_plane * self.normal.normalized()
-        projection_on_plane = point_to_project - Point(*projection_on_normal)
+        projection_on_plane = other - Point(*projection_on_normal)
         return Point(*projection_on_plane)
 
     
@@ -84,19 +100,19 @@ class Plane:
 # ┃                        DUNDER METHODS                            ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.p1} {self.p2} {self.p3}"
 
     def __getitem__(self, index: int) -> Point:
         """Gets the point at the specified index"""
         return (self.p1, self.p2, self.p3)[index]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Point]:
         """Returns an iterator over the points of the plane"""
         return iter((self.p1, self.p2, self.p3))
 
 
-def get_intersection(plane1: Plane, plane2: Plane, plane3: Plane) -> Union[Point, None]:
+def get_plane_intersection(plane1: Plane, plane2: Plane, plane3: Plane) -> Union[Point, None]:
     """Calculates the intersection point of three planes"""
     n1, d1 = plane1.normal, plane1.d
     n2, d2 = plane2.normal, plane2.d
