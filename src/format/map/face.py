@@ -163,7 +163,7 @@ class Face:
                 smallest = -1
 
                 for m in range(n + 1, len(self._vertices)):
-                    if not p.point_behind(self._vertices[m]):
+                    if not p.point_is_behind(self._vertices[m]):
                         b = (self._vertices[m] - center).normalized()
                         angle = a.dot(b)
 
