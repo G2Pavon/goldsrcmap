@@ -28,21 +28,30 @@ class Matrix3x3:
         if not isinstance(angle, (int, float)):
             raise TypeError(f"Unsupported type for angle: {type(angle)}")
         theta = radians(angle)
-        return cls([1, 0, 0],[0, cos(theta), -sin(theta)],[0, sin(theta), cos(theta)])
+
+        return cls([1,     0     ,           0],
+                   [0, cos(theta), -sin(theta)],
+                   [0, sin(theta), cos(theta)])
     
     @classmethod
     def rotation_y(cls, angle: float) -> 'Matrix3x3':
         if not isinstance(angle, (int, float)):
             raise TypeError(f"Unsupported type for angle: {type(angle)}")
         theta = radians(angle)
-        return cls([cos(theta), 0, sin(theta)], [0, 1, 0], [-sin(theta), 0, cos(theta)])
+
+        return cls([cos(theta),  0, sin(theta)],
+                   [    0     ,  1,     0     ],
+                   [-sin(theta), 0, cos(theta)])
         
     @classmethod
     def rotation_z(cls, angle: float) -> 'Matrix3x3':
         if not isinstance(angle, (int, float)):
             raise TypeError(f"Unsupported type for angle: {type(angle)}")
         theta = radians(angle)
-        return cls([cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1])
+
+        return cls([cos(theta), -sin(theta), 0],
+                   [sin(theta), cos(theta) , 0],
+                   [0         ,     0      , 1])
 
     @classmethod
     def rotation_xyz(cls, phi: float, theta: float, psi: float) -> 'Matrix3x3':
@@ -52,6 +61,7 @@ class Matrix3x3:
             raise TypeError(f"Unsupported type for theta angle: {type(theta)}")
         if not isinstance(psi, (int, float)):
             raise TypeError(f"Unsupported type for psi angle: {type(psi)}")
+        
         return Matrix3x3.rotation_z(psi) @ Matrix3x3.rotation_y(theta) @ Matrix3x3.rotation_x(phi)
 
     @classmethod
@@ -70,15 +80,21 @@ class Matrix3x3:
 
     @classmethod
     def reflection_xy(cls) -> 'Matrix3x3':
-        return cls([1, 0, 0],[0, 1, 0], [0, 0, -1])
+        return cls([1, 0, 0],
+                   [0, 1, 0],
+                   [0, 0, -1])
     
     @classmethod
     def reflection_xz(cls) -> 'Matrix3x3':
-        return cls([1, 0, 0],[0, -1, 0], [0, 0, 1])
+        return cls([1,  0, 0],
+                   [0, -1, 0],
+                   [0,  0, 1])
     
     @classmethod
     def reflection_yz(cls) -> 'Matrix3x3':
-        return cls([-1, 0, 0],[0, 1, 0], [0, 0, 1])
+        return cls([-1, 0, 0],
+                   [ 0, 1, 0],
+                   [ 0, 0, 1])
     
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                         METHODS                                  ┃
