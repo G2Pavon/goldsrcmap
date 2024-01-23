@@ -5,7 +5,8 @@ from format.map.face import Face
 
 from utils.math.vector import Vector3
 from utils.math.point import Point
-from utils.math.plane import Plane, get_intersection
+from utils.math.edge import Edge
+from utils.math.plane import get_intersection
 
 class Brush:
     """
@@ -24,16 +25,18 @@ class Brush:
         self._id: int = 0
         self.faces: list[Face] = []
         self.face_counter: int = 0
-        self._vertices: list[Point] = []
         self._origin: Optional[Point] = None
+        if not faces:
+            self._vertices: list[Point] = []
 
-        if isinstance(faces, list):
+        elif isinstance(faces, list):
             if not len(faces) >= 4:
                 raise ValueError(f'Invalid number of faces, expected 4 or more but found {len(faces)}')
             for face in faces:
                 if not isinstance(face, Face):
                     raise TypeError(f'Excepted a list of Face instances but found {type(face)}: {face}')
             self.add_face(faces)
+            self._vertices: list[Point] = self._get_vertices()
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -42,7 +45,7 @@ class Brush:
     @property
     def vertices(self) -> list[Point]:
         """Get a list of vertices of the brush"""
-        if not self._vertices:
+        if not self._vertices or len(self._vertices)==0:
             self._vertices = self._get_vertices()
         return self._vertices
     
@@ -54,7 +57,7 @@ class Brush:
         return self._origin
 
     @property
-    def edges(self):# -> list:
+    def edges(self) -> list[Edge]:
         """Get a list of edges of the brush"""
         edges =[]
         self.vertices
@@ -164,60 +167,40 @@ class Brush:
         for face in self:
             face.set_texture(new_texture)
 
-    def _get_vertices(self) -> list[Point]:
-        """Return the vertices of the brush"""
-        #https://github.com/stefanha/map-files/blob/master/MAPFiles.pdf
-
+    def _get_vertices(self) -> List[Point]:
+        """Return the vertices of the brush using another optimized approach."""
+        #TODO: implement faster vertex enumeration
         brush_vertices = []
 
-        for i in range(len(self.faces) - 2):
+        num_faces = len(self.faces)
+        face_normals = [face.plane.normal for face in self.faces]
+
+        for i in range(num_faces - 2):
             plane_i = self.faces[i].plane
 
-            for j in range(i, len(self.faces) - 1):
+            for j in range(i, num_faces - 1):
                 plane_j = self.faces[j].plane
 
-                for k in range(j, len(self.faces)):
+                for k in range(j, num_faces):
                     plane_k = self.faces[k].plane
+
                     # Point of intersection
                     vertex = get_intersection(plane_i, plane_j, plane_k)
                     if vertex:
-                        legal = True
-                        as_vector = Vector3(vertex.x, vertex.y, vertex.z)
+                        as_vector = vertex.as_vector()
 
-                        for m in range(len(self.faces)):
-                            if m != i and m != j and m != k:
-                                if plane_m := self.faces[m].plane:
-                                    if plane_m.normal.dot(as_vector) + plane_m.d > 0:
-                                        legal = False  # vertex is out of brush
-                                        break
-                        if legal:
+                        # Check if the vertex is out of the brush for all faces
+                        if all(
+                            face_normals[m].dot(as_vector) + self.faces[m].plane.d <= 0
+                            for m in range(num_faces) if m != i and m != j and m != k
+                        ):
                             self.faces[i]._add_vertex(vertex)
                             self.faces[j]._add_vertex(vertex)
                             self.faces[k]._add_vertex(vertex)
                             brush_vertices.append(vertex)
 
-        # Sorting vertices clockwise
         for face in self.faces:
-            vertices = face._vertices
-            center = face.centroid()
-
-            for n in range(len(vertices) - 2):
-                a = (face._vertices[n] - center).normalized()
-                p = Plane(face._vertices[n], center, center + face.normal)
-                smallest_angle = -1
-                smallest = -1
-
-                for m in range(n + 1, len(vertices)):
-                    if not p.point_behind(face._vertices[m]):
-                        b = (face._vertices[m] - center).normalized()
-                        angle = a.dot(b)
-
-                        if angle > smallest_angle:
-                            smallest_angle = angle
-                            smallest = m
-
-                face._vertices[n + 1], face._vertices[smallest] = face._vertices[smallest], face._vertices[n + 1]
-
+            face.sort_vertices_clockwise()
         return brush_vertices
 
 
