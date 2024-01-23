@@ -48,13 +48,11 @@ class Face:
         return self.texture.u_axis.cross(self.texture.v_axis).normalize()
 
     @property
-    def vertices(self):
-        if not self._vertices:
-            raise ValueError("Before calling the face vertices property, you must call the brush vertices property.")
+    def vertices(self) -> list[Point]:
         return self._vertices
     
     @property
-    def edges(self):
+    def edges(self) -> list[Edge]:
         if not self._edges:
             self._edges = self._get_edges()
         return self._edges
@@ -116,7 +114,7 @@ class Face:
         """Rotates the face around the Z-axis"""
         for point in self.plane:
             point.rotate_z(angle, center)
-        self.texture._rotate_uv_x(angle)
+        self.texture._rotate_uv_z(angle)
         self.texture._update_offset(Vector3(0, 0, 0))
 
     def rotate_xyz(self, phi, theta, psi):
@@ -154,6 +152,26 @@ class Face:
         edges = [Edge(self._vertices[i], self._vertices[(i + 1) % num_vertices]) for i in range(num_vertices)]
         return edges
 
+    def sort_vertices_clockwise(self):
+        """Sort the vertices of the face in clockwise order"""
+        center = self.centroid()
+        if center:
+            for n in range(len(self._vertices) - 2):
+                a = (self._vertices[n] - center).normalized()
+                p = Plane(self._vertices[n], center, center + self.normal)
+                smallest_angle = -1
+                smallest = -1
+
+                for m in range(n + 1, len(self._vertices)):
+                    if not p.point_behind(self._vertices[m]):
+                        b = (self._vertices[m] - center).normalized()
+                        angle = a.dot(b)
+
+                        if angle > smallest_angle:
+                            smallest_angle = angle
+                            smallest = m
+
+                self._vertices[n + 1], self._vertices[smallest] = self._vertices[smallest], self._vertices[n + 1]
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
