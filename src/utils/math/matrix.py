@@ -25,7 +25,7 @@ class Matrix3x3:
         
     @classmethod
     def rotation_x(cls, angle: float) -> 'Matrix3x3':
-        if isinstance(angle, float):
+        if isinstance(angle, (int, float)):
             theta = radians(angle)
             return cls([1, 0, 0],[0, cos(theta), -sin(theta)],[0, sin(theta), cos(theta)])
         else:
@@ -33,7 +33,7 @@ class Matrix3x3:
     
     @classmethod
     def rotation_y(cls, angle: float) -> 'Matrix3x3':
-        if isinstance(angle, float):
+        if isinstance(angle, (int, float)):
             theta = radians(angle)
             return cls([cos(theta), 0, sin(theta)], [0, 1, 0], [-sin(theta), 0, cos(theta)])
         else:
@@ -41,7 +41,7 @@ class Matrix3x3:
         
     @classmethod
     def rotation_z(cls, angle: float) -> 'Matrix3x3':
-        if isinstance(angle, float):
+        if isinstance(angle, (int, float)):
             theta = radians(angle)
             return cls([cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1])
         else:
@@ -49,9 +49,9 @@ class Matrix3x3:
 
     @classmethod
     def rotation_xyz(cls, phi: float, theta: float, psi: float) -> 'Matrix3x3':
-        if isinstance(phi, float):
-            if isinstance(theta, float):
-                if isinstance(psi, float):
+        if isinstance(phi, (int, float)):
+            if isinstance(theta, (int, float)):
+                if isinstance(psi, (int, float)):
                     R = Matrix3x3.rotation_z(psi) @ Matrix3x3.rotation_y(theta) @ Matrix3x3.rotation_x(phi)
                 else:
                     raise TypeError(f"Unsupported type for psi angle: {type(psi)}")
@@ -63,7 +63,7 @@ class Matrix3x3:
 
     @classmethod
     def rotate_around_axis(cls, angle: float, axis: Vector3) -> 'Matrix3x3':
-        if isinstance(angle, float):
+        if isinstance(angle, (int, float)):
             angle = radians(angle)
             c = cos(angle)
             s = sin(angle)
@@ -134,7 +134,7 @@ class Matrix3x3:
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
     def __mul__(self, scalar: float):
-        if isinstance(scalar, float):
+        if isinstance(scalar, (int, float)):
             a11, a12, a13 = self.a11 * scalar, self.a12 * scalar, self.a13 * scalar
             a21, a22, a23 = self.a21 * scalar, self.a22 * scalar, self.a23 * scalar
             a31, a32, a33 = self.a31 * scalar, self.a32 * scalar, self.a33 * scalar

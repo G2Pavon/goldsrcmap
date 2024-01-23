@@ -34,7 +34,7 @@ class Vector3:
         """Normalizes the vector"""
         length = self.length()
         if length == 0:
-            raise ValueError("Cannot normalize a zero-length vector.")
+            raise ValueError("Can't normalize a zero-length vector")
         inv_length = 1.0 / length
         self.x *= inv_length
         self.y *= inv_length
@@ -45,9 +45,8 @@ class Vector3:
         """Returns a normalized version of the vector"""
         length = self.length()
         if length == 0:
-            raise ValueError("Cannot normalize a zero-length vector.")
+            raise ValueError("Can't normalize a zero-length vector")
         return Vector3(self.x / length, self.y / length, self.z / length)
-
 
     def dot(self, other: 'Vector3') -> float:
         """Computes the dot product of this vector with another vector"""
@@ -117,13 +116,13 @@ class Vector3:
 
     def __mul__(self, other: float) -> 'Vector3':
         """Multiplies the vector by a scalar"""
-        if not isinstance(other, float):
+        if not isinstance(other, (int,float)):
             raise TypeError(f"Unsupported type for multiplication (*): {type(other)}")
         return Vector3(self.x * other, self.y * other, self.z * other)
         
     def __imul__(self, other: float) -> 'Vector3':
         """In-place multiplication with a scalar"""
-        if not isinstance(other, float):
+        if not isinstance(other, (int,float)):
             raise TypeError(f"Unsupported type for in-place division (*=): {type(other)}")
         self.x *= other
         self.y *= other
@@ -132,19 +131,19 @@ class Vector3:
 
     def __rmul__(self, other: float) -> 'Vector3':
         """Right multiplication with a scalar"""
-        if not isinstance(other, float):
+        if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for right multiplication (*): {type(other)}")
         return Vector3(other * self.x, other * self.y, other * self.z)
     
     def __truediv__(self, other: float) -> 'Vector3':
         """Divides the vector by a scalar"""
-        if not isinstance(other, float):
+        if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for division (/): {type(other)}")
         return Vector3(self.x / other, self.y / other, self.z / other)
 
     def __itruediv__(self, other: float) -> 'Vector3':
         """In-place division with a scalar"""
-        if not isinstance(other, float):
+        if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for in-place division (/=): {type(other)}")
         if other == 0:
             raise ZeroDivisionError("Division by zero")

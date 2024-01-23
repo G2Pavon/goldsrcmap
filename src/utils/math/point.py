@@ -1,6 +1,5 @@
-from typing import Union
 from dataclasses import dataclass
-from typing import Tuple, Iterator
+from typing import Tuple, Iterator, Union
 from copy import deepcopy
 
 from math import sqrt
@@ -46,8 +45,8 @@ class Point:
         return self
 
     def is_zero(self, threshold: float = 1e-6) -> bool:
-        """Checks if the point is close to the origin (zero point)"""
-        return self.x < threshold and self.y < threshold and self.z < threshold
+        """Checks if the point is close to the origin"""
+        return abs(self.x) < threshold and abs(self.y) < threshold and abs(self.z) < threshold
     
     def is_near(self, other: 'Point', threshold: float = 1e-12) -> bool:
         """Checks if the point is near another point within a specified threshold"""
@@ -113,7 +112,6 @@ class Point:
             self.x += center[0]
             self.y += center[1]
             self.z += center[2]
-
         return self
     
     def rotate_around_axis(self, angle: float, axis: Vector3) -> 'Point':
@@ -153,26 +151,23 @@ class Point:
         
     def __sub__(self, other: 'Point') -> Vector3:
         """Subtracts another Point from this point"""
-        if isinstance(other, Point):
-            return Vector3(self.x - other.x, self.y - other.y, self.z - other.z)
-        else:
+        if not isinstance(other, Point):
             raise TypeError(f"Unsupported type for subtraction (-): {type(other)}")
+        return Vector3(self.x - other.x, self.y - other.y, self.z - other.z)
     
     def __mul__(self, other: float) -> 'Point':
         """Multiplies the point by a scalar"""
-        if isinstance(other, (int, float)):
-            return Point(self.x * other, self.y * other, self.z * other)
-        else:
+        if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for multiplication (*): {type(other)}")
+        return Point(self.x * other, self.y * other, self.z * other)
 
     def __truediv__(self, other: float) -> 'Point':
         """Divides the point by a scalar"""
         if other == 0:
             raise ZeroDivisionError
-        if isinstance(other, float):
-            return Point(self.x / other, self.y / other, self.z / other)
-        else:
+        if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for division (/): {type(other)}")
+        return Point(self.x / other, self.y / other, self.z / other)
     
     def __iadd__(self, other: Union[float,'Point']) -> 'Point':
         """In-place addition"""
@@ -180,7 +175,7 @@ class Point:
             self.x += other.x
             self.y += other.y
             self.z += other.z 
-        elif isinstance(other, float):
+        elif isinstance(other, (int, float)):
             self.x += other
             self.y += other
             self.z += other
@@ -194,7 +189,7 @@ class Point:
             self.x -= other.x
             self.y -= other.y
             self.z -= other.z 
-        elif isinstance(other, float):
+        elif isinstance(other, (int, float)):
             self.x -= other
             self.y -= other
             self.z -= other
@@ -204,47 +199,41 @@ class Point:
     
     def __imul__(self, other: float) -> 'Point':
         """In-place multiplication by a scalar"""
-        if isinstance(other, float):
-            self.x *= other
-            self.y *= other
-            self.z *= other
-        else:
+        if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for in-place multiplication (*=): {type(other)}")
+        self.x *= other
+        self.y *= other
+        self.z *= other
         return self
     
     def __itruediv__(self, other: float) -> 'Point':
         """In-place division by a scalar"""
         if other == 0:
             raise ZeroDivisionError
-        if isinstance(other, float):
-            self.x /= other
-            self.y /= other
-            self.z /= other
-        else:
+        if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for in-place division (/=): {type(other)}")
+        self.x /= other
+        self.y /= other
+        self.z /= other
         return self
 
     def __rmul__(self, other: float) -> 'Point':
         """Right multiplication with a scalar"""
-        if isinstance(other, float):
-            return Point(other * self.x, other * self.y, other * self.z)
-        else:
+        if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for right multiplication (*): {type(other)}")
+        return Point(other * self.x, other * self.y, other * self.z)
 
     def __eq__(self, other: 'Point') -> bool:
         """Checks if two points are equal"""
-        if isinstance(other, Point):
-            return (self.x, self.y, self.z) == (other.x, other.y, other.z)
-        else:
+        if not isinstance(other, Point):
             raise TypeError(f"Unsupported type for equality comparison (==): {type(other)}")
-
+        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
     def __ne__(self, other: 'Point') -> bool:
         """Checks if two points are not equal"""
-        if isinstance(other, Point):
-            return not self.__eq__(other)
-        else:
+        if not isinstance(other, Point):
             raise TypeError(f"Unsupported type for inequality comparison (!=): {type(other)}")
+        return not self.__eq__(other)
 
     def __neg__(self) -> 'Point':
         """Negates the point"""
