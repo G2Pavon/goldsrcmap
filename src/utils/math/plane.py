@@ -1,5 +1,6 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import Union, Iterator
+from typing import Iterator
 
 from utils.math.vector import Vector3
 from utils.math.point import Point
@@ -14,8 +15,8 @@ class Plane:
     p1: Point
     p2: Point
     p3: Point
-    _normal: Union[None, Vector3] = None
-    _d: Union[None, float] = None
+    _normal: None|Vector3 = None
+    _d: None|float = None
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        PROPERTY                                  ┃
@@ -45,7 +46,7 @@ class Plane:
         ac = self.p3 - self.p1
         return ab.cross(ac).is_null()
     
-    def distance_to_plane(self, other: 'Plane') -> float:
+    def distance_to_plane(self, other: Plane) -> float:
         """Calculates the distance between two planes"""
         if not isinstance(other, Plane):
             raise TypeError(f"Unsupported type for distance between plane to plane: {type(other)}")
@@ -57,7 +58,7 @@ class Plane:
             raise TypeError(f"Unsupported type for distance between plane to point: {type(other)}")
         return abs(self.normal.dot(other.as_vector()) + self.d) / self.normal.length()
 
-    def is_coplanar(self, other: 'Plane', epsilon: float = 1e-6) -> bool:
+    def is_coplanar(self, other: Plane, epsilon: float = 1e-6) -> bool:
         """Checks if two planes are coplanar (parallel and overlapping)"""
         return self.is_parallel(other) and self.distance_to_plane(other) < epsilon
 
@@ -79,12 +80,12 @@ class Plane:
             raise TypeError(f"Unsupported type to check position relative to plane: {type(other)}")
         return abs(self._solve_plane_equation(other)) < threshold
     
-    def is_parallel(self, other: 'Plane') -> bool:
+    def is_parallel(self, other: Plane) -> bool:
         if not isinstance(other, Plane):
             raise TypeError(f"Unsupported type to check if planes are parallel: {type(other)}")
         return self.normal.is_parallel(other.normal)
 
-    def is_perpendicular(self, other: 'Plane') -> bool:
+    def is_perpendicular(self, other: Plane) -> bool:
         if not isinstance(other, Plane):
             raise TypeError(f"Unsupported type to check if planes are perpendicular: {type(other)}")
         return self.normal.is_perpendicular(other.normal)
@@ -118,9 +119,12 @@ class Plane:
     def __iter__(self) -> Iterator[Point]:
         """Returns an iterator over the points of the plane"""
         return iter((self.p1, self.p2, self.p3))
+    
+    def __eq__(self, other: Plane) -> bool:
+        return self.is_coplanar(other) and self.normal.dot(other.normal) == 1
 
 
-def get_plane_intersection(plane1: Plane, plane2: Plane, plane3: Plane) -> Union[Point, None]:
+def get_plane_intersection(plane1: Plane, plane2: Plane, plane3: Plane) -> Point|None:
     """Calculates the intersection point of three planes"""
     n1, d1 = plane1.normal, plane1.d
     n2, d2 = plane2.normal, plane2.d
