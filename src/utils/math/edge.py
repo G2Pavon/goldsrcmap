@@ -1,5 +1,5 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import Union
 
 from utils.math.point import Point
 from utils.math.vector import Vector3
@@ -14,15 +14,15 @@ class Edge:
     """
     start: Point
     end: Point
-    _length: Union[None, float] = None
-    _direction: Union[None, Vector3] = None
-    _invdirection: Union[None, Vector3] = None
+    _length: None|float = None
+    _direction: None|Vector3 = None
+    _invdirection: None|Vector3 = None
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                        CLASSMETHOD                               ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     @classmethod
-    def from_points(cls, a: Point, b: Point) -> 'Edge':
+    def from_points(cls, a: Point, b: Point) -> Edge:
         """Create an edge using two points"""
         return cls(a, b)
     
@@ -59,26 +59,30 @@ class Edge:
         mid = (self.start + self.end) / 2
         return mid
 
-    def is_parallel(self, other: 'Edge') -> bool:
+    def is_parallel(self, other: Edge|Vector3) -> bool:
         """Check if this edge is parallel to another edge"""
-        return self.direction1.is_parallel(other.direction1)
+        if isinstance(other, Edge):
+            other = other.direction1
+        return self.direction1.is_parallel(other)
 
-    def is_perpendicular(self, other: 'Edge') -> bool:
+    def is_perpendicular(self, other: Edge|Vector3) -> bool:
         """Check if this edge is perpendicular to another edge"""
-        return self.direction1.is_perpendicular(other.direction1)
+        if isinstance(other, Edge):
+            other = other.direction1
+        return self.direction1.is_perpendicular(other)
 
-    def similar_to(self, other: 'Edge') -> bool:
-        """Check if this edge is similar to another edge"""
+    def similar_to(self, other: Edge) -> bool:
+        """Check if this edge is near to another edge"""
         return self.start.is_near(other.start) and self.end.is_near(other.end)
     
-    def distance_to_point(self, point: Point):
+    def distance_to_point(self, point: Point) -> tuple[float, Point]:
         """Return the shortest distance and closest points between edge and point"""
         t = (point - self.start).dot(self.direction1) / (self.direction1).dot(self.direction1)
         t = min(max(t, 0), 1)
         closest_edge_point = self.start + t * self.direction1
         return (point - closest_edge_point).length(), closest_edge_point
 
-    def distance_to_edge(self, other: 'Edge'):
+    def distance_to_edge(self, other: Edge) -> tuple[float, Point, Point]:
         """Return the shortest distance and closest points between two edges"""
         epsilon = 1e-6
 
@@ -134,6 +138,6 @@ class Edge:
         """Get a string representation of the edge"""
         return f"[{self.start}, {self.end}]"
 
-    def __eq__(self, other: 'Edge') -> bool:
+    def __eq__(self, other: Edge) -> bool:
         """Check if this edge is equal to another edge"""
         return self.start == other.start and self.end == other.end

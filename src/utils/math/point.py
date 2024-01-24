@@ -1,8 +1,9 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import Tuple, Iterator, Union
+from typing import Tuple, Iterator
 from copy import deepcopy
 
-from math import sqrt
+from math import hypot
 
 from .vector import Vector3
 from .matrix import Matrix3x3
@@ -29,15 +30,15 @@ class Point:
     def as_vector(self) -> Vector3:
         return Vector3(self.x, self.y, self.z)
 
-    def distance_to_point(self, other: 'Point') -> float:
+    def distance_to_point(self, other: Point) -> float:
         """Calculates the Euclidean distance between two points"""
-        return sqrt((other.x - self.x)**2 + (other.y - self.y)**2 + (other.z - self.z)**2)
+        return hypot(other.x - self.x, other.y - self.y, other.z - self.z)
 
-    def square_distance(self, other: 'Point') -> float:
+    def square_distance(self, other: Point) -> float:
         """Calculates the squared Euclidean distance between two points"""
         return (other.x - self.x)**2 + (other.y - self.y)**2 + (other.z - self.z)**2
     
-    def move_by(self, x: float, y:float, z:float) -> 'Point':
+    def move_by(self, x: float, y:float, z:float) -> Point:
         """Moves the point by the specified offsets"""
         self.x += x
         self.y += y
@@ -48,14 +49,14 @@ class Point:
         """Checks if the point is close to the origin"""
         return abs(self.x) < threshold and abs(self.y) < threshold and abs(self.z) < threshold
     
-    def is_near(self, other: 'Point', threshold: float = 1e-12) -> bool:
+    def is_near(self, other: Point, threshold: float = 1e-12) -> bool:
         """Checks if the point is near another point within a specified threshold"""
         dx = abs(self.x - other.x)
         dy = abs(self.y - other.y)
         dz = abs(self.z - other.z)
         return dx < threshold and dy < threshold and dz < threshold
 
-    def rotate_x(self, angle: float, center: Union['Point',list]=[0,0,0]) -> 'Point':
+    def rotate_x(self, angle: float, center: Point|list=[0,0,0]):
         """Rotates the point around the X-axis using Matrix3x3 rotation"""
         # If a center point is provided, translate the point to the origin
         if center:
@@ -71,7 +72,7 @@ class Point:
             self.z += center[2]
         return self
 
-    def rotate_y(self, angle: float, center: Union['Point',list]=[0,0,0]) -> 'Point':
+    def rotate_y(self, angle: float, center: Point|list=[0,0,0]):
         """Rotates the point around the Y-axis"""
         if center:
             self.x -= center[0]
@@ -85,7 +86,7 @@ class Point:
             self.z += center[2]
         return self
 
-    def rotate_z(self, angle: float, center: Union['Point',list]=[0,0,0]) -> 'Point':
+    def rotate_z(self, angle: float, center: Point|list=[0,0,0]):
         """Rotates the point around the Y-axis"""
         if center:
             self.x -= center[0]
@@ -99,7 +100,7 @@ class Point:
             self.z += center[2]
         return self
 
-    def rotate_xyz(self, phi: float, theta: float, psi: float, center: Union['Point',list]=[0,0,0]) -> 'Point':
+    def rotate_xyz(self, phi: float, theta: float, psi: float, center: Point|list=[0,0,0]):
         """Rotates the point around the X, Y, and Z axes"""
         if center:
             self.x -= center[0]
@@ -114,12 +115,12 @@ class Point:
             self.z += center[2]
         return self
     
-    def rotate_around_axis(self, angle: float, axis: Vector3) -> 'Point':
+    def rotate_around_axis(self, angle: float, axis: Vector3):
         """Rotates the point around an arbitrary axis """
         new_coords = Matrix3x3.rotate_around_axis(angle, axis) @ self.as_vector()
         self.x, self.y, self.z = new_coords.components()
 
-    def copy(self) -> 'Point':
+    def copy(self) -> Point:
         """Creates a deep copy of the point"""
         return deepcopy(self)
     
@@ -137,10 +138,14 @@ class Point:
         return iter((self.x, self.y, self.z))
 
     def __getitem__(self, index: int) -> float:
-        """Returns the component of the point at the specified index"""
+        """Returns the component of the point at the specifie index"""
         return [self.x, self.y, self.z][index]
     
-    def __add__(self, other: Union['Point',Vector3]) -> 'Point': 
+    def __setitem__(self, index: int, value: float):
+        """Sets the component of the point at the specified index"""
+        self[index] = float(value)
+
+    def __add__(self, other: Point|Vector3) -> Point: 
         """Adds another Point or Vector3 to this point"""
         if isinstance(other, Point):
             return Point(self.x + other.x, self.y + other.y, self.z + other.z)
@@ -149,19 +154,19 @@ class Point:
         else:
             raise TypeError(f"Unsupported type for addition (+): {type(other)}")
         
-    def __sub__(self, other: 'Point') -> Vector3:
+    def __sub__(self, other: Point) -> Vector3:
         """Subtracts another Point from this point"""
         if not isinstance(other, Point):
             raise TypeError(f"Unsupported type for subtraction (-): {type(other)}")
         return Vector3(self.x - other.x, self.y - other.y, self.z - other.z)
     
-    def __mul__(self, other: float) -> 'Point':
+    def __mul__(self, other: float) -> Point:
         """Multiplies the point by a scalar"""
         if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for multiplication (*): {type(other)}")
         return Point(self.x * other, self.y * other, self.z * other)
 
-    def __truediv__(self, other: float) -> 'Point':
+    def __truediv__(self, other: float) -> Point:
         """Divides the point by a scalar"""
         if other == 0:
             raise ZeroDivisionError
@@ -169,7 +174,7 @@ class Point:
             raise TypeError(f"Unsupported type for division (/): {type(other)}")
         return Point(self.x / other, self.y / other, self.z / other)
     
-    def __iadd__(self, other: Union[float,'Point']) -> 'Point':
+    def __iadd__(self, other: float|Point) -> Point:
         """In-place addition"""
         if isinstance(other, Point):
             self.x += other.x
@@ -183,7 +188,7 @@ class Point:
             raise TypeError(f"Unsupported type for in-place addition (+=): {type(other)}")
         return self
     
-    def __isub__(self, other: Union[float,'Point']) -> 'Point':
+    def __isub__(self, other: float|Point) -> Point:
         """In-place subtraction"""
         if isinstance(other, Point):
             self.x -= other.x
@@ -197,7 +202,7 @@ class Point:
             raise TypeError(f"Unsupported type for in-place substraction (-=): {type(other)}")
         return self
     
-    def __imul__(self, other: float) -> 'Point':
+    def __imul__(self, other: float) -> Point:
         """In-place multiplication by a scalar"""
         if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for in-place multiplication (*=): {type(other)}")
@@ -206,7 +211,7 @@ class Point:
         self.z *= other
         return self
     
-    def __itruediv__(self, other: float) -> 'Point':
+    def __itruediv__(self, other: float) -> Point:
         """In-place division by a scalar"""
         if other == 0:
             raise ZeroDivisionError
@@ -217,24 +222,24 @@ class Point:
         self.z /= other
         return self
 
-    def __rmul__(self, other: float) -> 'Point':
+    def __rmul__(self, other: float) -> Point:
         """Right multiplication with a scalar"""
         if not isinstance(other, (int, float)):
             raise TypeError(f"Unsupported type for right multiplication (*): {type(other)}")
-        return Point(other * self.x, other * self.y, other * self.z)
+        return self.__mul__(other)
 
-    def __eq__(self, other: 'Point') -> bool:
+    def __eq__(self, other: Point) -> bool:
         """Checks if two points are equal"""
         if not isinstance(other, Point):
             raise TypeError(f"Unsupported type for equality comparison (==): {type(other)}")
-        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
+        return self.x, self.y, self.z == other.x, other.y, other.z
 
-    def __ne__(self, other: 'Point') -> bool:
+    def __ne__(self, other: Point) -> bool:
         """Checks if two points are not equal"""
         if not isinstance(other, Point):
             raise TypeError(f"Unsupported type for inequality comparison (!=): {type(other)}")
         return not self.__eq__(other)
 
-    def __neg__(self) -> 'Point':
+    def __neg__(self) -> Point:
         """Negates the point"""
         return Point(-self.x, -self.y, -self.z)

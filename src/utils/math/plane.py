@@ -52,29 +52,32 @@ class Plane:
         return abs(self.d - other.d) / self.normal.length() if self.is_parallel(other) else 0
 
     def distance_to_point(self, other: Point) -> float:
-        """Calculates the distance between the plane and a point"""
+        """Calculates the perpendicular(shortest) distance between the plane and a point"""
         if not isinstance(other, Point):
             raise TypeError(f"Unsupported type for distance between plane to point: {type(other)}")
         return abs(self.normal.dot(other.as_vector()) + self.d) / self.normal.length()
 
-    def point_is_in_front(self, other: Point, threshold=1e-4) -> bool:
+    def is_coplanar(self, other: 'Plane', epsilon: float = 1e-6) -> bool:
+        """Checks if two planes are coplanar (parallel and overlapping)"""
+        return self.is_parallel(other) and self.distance_to_plane(other) < epsilon
+
+    def is_point_above(self, other: Point, threshold=1e-6) -> bool:
         """Checks if a point is in front of the plane"""
         if not isinstance(other, Point):
             raise TypeError(f"Unsupported type to check position relative to plane: {type(other)}")
-        return self.normal.dot(other - self.p1) > threshold
+        return self._solve_plane_equation(other) > threshold
 
-    def point_is_behind(self, other: Point, threshold=-1e-4) -> bool:
+    def is_point_below(self, other: Point, threshold=1e-6) -> bool:
         """Checks if a point is behind the plane"""
         if not isinstance(other, Point):
             raise TypeError(f"Unsupported type to check position relative to plane: {type(other)}")
-        return self.normal.dot(other - self.p1) < threshold
+        return self._solve_plane_equation(other) < -threshold
 
-    def point_is_in_plane(self, other: Point, threshold: float = 1e-4) -> bool:
+    def is_point_on_plane(self, other: Point, threshold: float = 1e-6) -> bool:
         """Checks if a point is on the plane"""
         if not isinstance(other, Point):
             raise TypeError(f"Unsupported type to check position relative to plane: {type(other)}")
-        distance_to_plane = abs(self.normal.dot(other.as_vector()) + self.d)
-        return distance_to_plane < threshold
+        return abs(self._solve_plane_equation(other)) < threshold
     
     def is_parallel(self, other: 'Plane') -> bool:
         if not isinstance(other, Plane):
@@ -94,6 +97,11 @@ class Plane:
         projection_on_normal = distance_from_plane * self.normal.normalized()
         projection_on_plane = other - Point(*projection_on_normal)
         return Point(*projection_on_plane)
+    
+    def _solve_plane_equation(self, other: (Point, Vector3)) -> float:
+        if isinstance(other, Point):
+            other = other.as_vector()
+        return self.normal.dot(other) + self.d
 
     
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -105,7 +113,7 @@ class Plane:
 
     def __getitem__(self, index: int) -> Point:
         """Gets the point at the specified index"""
-        return (self.p1, self.p2, self.p3)[index]
+        return [self.p1, self.p2, self.p3][index]
 
     def __iter__(self) -> Iterator[Point]:
         """Returns an iterator over the points of the plane"""
