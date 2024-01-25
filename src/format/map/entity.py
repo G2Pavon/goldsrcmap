@@ -1,5 +1,3 @@
-from typing import Union, List
-
 from format.map.brush import Brush
 from format.map.face import Face
 from utils.math.point import Point
@@ -15,10 +13,10 @@ class Entity:
         id (int): Unique identifier for the entity.
         brush_counter (int): Counter for assigning unique IDs to brushes.
     """
-    def __init__(self, classname: Union[str, None]=None, origin_or_brushes: Union[Point, List[float], Brush, List[Brush], None]=None, properties: Union[dict, None]=None):
+    def __init__(self, classname: str|None=None, origin_or_brushes: Point|list[float]|Brush|list[Brush]|None=None, properties: dict|None=None):
         self._id: int = 0
         self.properties: dict = {}
-        self.brushes: List[Brush] = []
+        self.brushes: list[Brush] = []
         self.brush_counter: int = 1
         
         # TODO: Remove default values for 'classname' and 'origin_or_brushes' parameters to make them required during entity initialization. 
@@ -60,18 +58,15 @@ class Entity:
             raise ValueError(f"Entity N°{self._id}: 'classname' value not found")
 
     @property
-    def origin(self) -> Union[Point, None]:
+    def origin(self) -> Point|None:
         """Get the origin of the entity"""
         if self.is_point_entity:
             origin_value = self['origin']
-            if origin_value is None:
-                raise ValueError(f"Entity N°{self._id}: Origin not found")
-            
             try:
                 x, y, z = map(float, str(origin_value).split())
                 return Point(x, y, z)
-            except ValueError:
-                raise ValueError(f'Entity N°{self._id}: Invalid origin format "{origin_value}"')
+            except SyntaxError:
+                raise SyntaxError(f'Entity N°{self._id}: Invalid origin format "{origin_value}"')
 
         elif self.is_brush_entity:
             brush_origins = [brush.centroid() for brush in self.brushes]
@@ -109,7 +104,7 @@ class Entity:
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                         METHODS                                  ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-    def add_brush(self, *args: Union[Brush, List[Brush]]) -> None:
+    def add_brush(self, *args: Brush|list[Brush]) -> None:
         """Add brush(es) to entity"""
         for arg in args:
             brush_list = arg if isinstance(arg, list) else [arg]
@@ -150,8 +145,7 @@ class Entity:
 
     def __iter__(self):
         """Return an iterator over the entity's brushes"""
-        if self.is_brush_entity or self['classname'] == 'worldspawn':
-            iter(self.brushes)
+        return iter(self.brushes)
         
     def __setitem__(self, key: str, value: str) -> None:
         """Set an item in the entity's property dictionary"""
