@@ -1,5 +1,5 @@
+from __future__ import annotations
 from copy import deepcopy
-from typing import Union
 
 from format.map.texture import Texture
 
@@ -7,7 +7,6 @@ from utils.math.plane import Plane
 from utils.math.vector import Vector3
 from utils.math.point import Point
 from utils.math.edge import Edge
-
 
 class Face:
     """
@@ -56,11 +55,12 @@ class Face:
         if not self._edges:
             self._edges = self._get_edges()
         return self._edges
+    
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                         METHODS                                  ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-    def centroid(self) -> Union[Point, None]:
+    def centroid(self) -> Point|None:
         """Calculates the centroid of the face"""
         if not self.plane.collinear_points():
             if self._vertices:
@@ -71,7 +71,7 @@ class Face:
                 return Point(centroid_x, centroid_y, centroid_z)
         return None
     
-    def copy(self) -> 'Face':
+    def copy(self) -> Face:
         """Creates a deep copy of the face"""
         return deepcopy(self)
 
@@ -140,7 +140,7 @@ class Face:
         """Add a vertex to the face"""
         self._vertices.append(vertex)
 
-    def _get_edges(self):
+    def _get_edges(self) -> list[Edge]:
         """Compute the edges of the face based on its vertices"""
         if not self._vertices:
             raise ValueError("Vertices must be set before calculating edges.")
@@ -152,18 +152,19 @@ class Face:
         edges = [Edge(self._vertices[i], self._vertices[(i + 1) % num_vertices]) for i in range(num_vertices)]
         return edges
 
-    def sort_vertices_clockwise(self):
+    def sort_vertices_clockwise(self) -> None:
         """Sort the vertices of the face in clockwise order"""
         center = self.centroid()
+        len_vertices = len(self._vertices)
         if center:
-            for n in range(len(self._vertices) - 2):
+            for n in range(len_vertices - 2):
                 a = (self._vertices[n] - center).normalized()
                 p = Plane(self._vertices[n], center, center + self.normal)
                 smallest_angle = -1
                 smallest = -1
 
-                for m in range(n + 1, len(self._vertices)):
-                    if not p.point_is_behind(self._vertices[m]):
+                for m in range(n + 1, len_vertices):
+                    if not p.is_point_below(self._vertices[m]):
                         b = (self._vertices[m] - center).normalized()
                         angle = a.dot(b)
 
@@ -172,6 +173,9 @@ class Face:
                             smallest = m
 
                 self._vertices[n + 1], self._vertices[smallest] = self._vertices[smallest], self._vertices[n + 1]
+
+    def is_point_on_face(self, point: Point) -> bool:
+        return NotImplemented
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -185,7 +189,7 @@ class Face:
         """Return an iterator over the face plane points"""
         return iter((self.plane))
 
-    def __contains__(self, other: Union[str, Point]) -> bool:
+    def __contains__(self, other: str|Point) -> bool:
         """Checks if a texture or a point is present in the face plane"""
         if isinstance(other, str):
             return other in self.texture.name
