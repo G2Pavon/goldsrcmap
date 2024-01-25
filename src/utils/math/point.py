@@ -49,7 +49,7 @@ class Point:
         """Checks if the point is close to the origin"""
         return abs(self.x) < threshold and abs(self.y) < threshold and abs(self.z) < threshold
     
-    def is_near(self, other: Point, threshold: float = 1e-12) -> bool:
+    def is_close(self, other: Point, threshold: float = 1e-12) -> bool:
         """Checks if the point is near another point within a specified threshold"""
         dx = abs(self.x - other.x)
         dy = abs(self.y - other.y)

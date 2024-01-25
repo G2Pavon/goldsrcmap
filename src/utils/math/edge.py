@@ -73,7 +73,7 @@ class Edge:
 
     def similar_to(self, other: Edge) -> bool:
         """Check if this edge is near to another edge"""
-        return self.start.is_near(other.start) and self.end.is_near(other.end)
+        return self.start.is_close(other.start) and self.end.is_close(other.end)
     
     def distance_to_point(self, point: Point) -> tuple[float, Point]:
         """Return the shortest distance and closest points between edge and point"""
