@@ -58,8 +58,8 @@ class Plane:
             raise TypeError(f"Unsupported type for distance between plane to point: {type(other)}")
         return abs(self.normal.dot(other.as_vector()) + self.d) / self.normal.length()
 
-    def is_coplanar(self, other: Plane, epsilon: float = 1e-6) -> bool:
-        """Checks if two planes are coplanar (parallel and overlapping)"""
+    def is_overlap(self, other: Plane, epsilon: float = 1e-6) -> bool:
+        """Checks if two planes overlap"""
         return self.is_parallel(other) and self.distance_to_plane(other) < epsilon
 
     def is_point_above(self, other: Point, threshold=1e-6) -> bool:
@@ -121,7 +121,7 @@ class Plane:
         return iter((self.p1, self.p2, self.p3))
     
     def __eq__(self, other: Plane) -> bool:
-        return self.is_coplanar(other) and self.normal.dot(other.normal) == 1
+        return self.is_overlap(other) and self.normal.dot(other.normal) == 1
 
 
 def get_plane_intersection(plane1: Plane, plane2: Plane, plane3: Plane) -> Point|None:
