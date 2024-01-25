@@ -27,10 +27,7 @@ def load_map(filepath:str) -> Map:
     brace_count = 0
     current_entity = None
     current_brush = None
-
-    temp_entities = []
-    temp_brushes = []
-
+    
     with open(filepath, 'r') as file:
         for line in file.readlines():
 

@@ -81,12 +81,11 @@ class Face:
             return self.texture.name == text_name.upper()
         return text_name.upper() in self.texture.name
 
-    def is_valid(self, threshold: float = 1e-3):
+    def is_valid(self) -> bool:
         """Checks if the face is valid based on its geometry or the texture axis alignement"""
         if (self.plane.collinear_points()
-            or abs(abs(self.normal.dot(self.texture.u_axis)) - 1) < threshold
-            or abs(abs(self.normal.dot(self.texture.v_axis)) - 1) < threshold
-        ):
+            or self.normal.is_parallel(self.texture.u_axis)
+            or self.normal.is_parallel(self.texture.v_axis)):
             return False
         return True
 

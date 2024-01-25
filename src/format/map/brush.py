@@ -1,6 +1,5 @@
 from __future__ import annotations
 from copy import deepcopy
-from typing import Iterator
 
 from format.map.face import Face
 
@@ -27,10 +26,10 @@ class Brush:
         self.faces: list[Face] = []
         self.face_counter: int = 0
         self._origin: Point|None = None
-        if not faces:
+        if faces is None: # when load map
             self._vertices: list[Point] = []
 
-        elif isinstance(faces, list):
+        elif isinstance(faces, list): # when use BrushGenerator
             if not len(faces) >= 4:
                 raise ValueError(f'Invalid number of faces, expected 4 or more but found {len(faces)}')
             for face in faces:
@@ -217,6 +216,6 @@ class Brush:
         """Return a string representation of the brush"""
         return f'{self.faces}'
     
-    def __iter__(self) -> Iterator[Face]: 
+    def __iter__(self): 
         """Return an iterator over the faces of the brush"""
         return iter(self.faces)
