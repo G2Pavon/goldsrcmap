@@ -1,12 +1,13 @@
+from __future__ import annotations
 from copy import deepcopy
-from typing import Optional, Union, Iterator, List
+from typing import Iterator
 
 from format.map.face import Face
 
 from utils.math.vector import Vector3
 from utils.math.point import Point
 from utils.math.edge import Edge
-from utils.math.plane import get_intersection
+from utils.math.plane import get_plane_intersection
 
 class Brush:
     """
@@ -21,11 +22,11 @@ class Brush:
     - _origin (Optional[Point]): Cached centroid of the brush.
     """
 
-    def __init__(self, faces: Union[List[Face], None]=None):
+    def __init__(self, faces: list[Face]|None=None):
         self._id: int = 0
         self.faces: list[Face] = []
         self.face_counter: int = 0
-        self._origin: Optional[Point] = None
+        self._origin: Point|None = None
         if not faces:
             self._vertices: list[Point] = []
 
@@ -36,7 +37,7 @@ class Brush:
                 if not isinstance(face, Face):
                     raise TypeError(f'Excepted a list of Face instances but found {type(face)}: {face}')
             self.add_face(faces)
-            self._vertices: list[Point] = self._get_vertices()
+            self._vertices: list[Point] = self._vertex_enumeration()
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -45,8 +46,8 @@ class Brush:
     @property
     def vertices(self) -> list[Point]:
         """Get a list of vertices of the brush"""
-        if not self._vertices or len(self._vertices)==0:
-            self._vertices = self._get_vertices()
+        if not self._vertices:
+            self._vertices = self._vertex_enumeration()
         return self._vertices
     
     @property
@@ -70,7 +71,7 @@ class Brush:
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃                         METHODS                                  ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-    def add_face(self, *args: Union[Face, list[Face]]) -> None:
+    def add_face(self, *args: Face | list[Face]) -> None:
         """Add face(es) to the brush"""
         for arg in args:
             face_list = arg if isinstance(arg, list) else [arg]
@@ -103,7 +104,7 @@ class Brush:
 
         return Point(centroid_x, centroid_y, centroid_z)
     
-    def copy(self) -> 'Brush':
+    def copy(self) -> Brush:
         """Create a deep copy of the brush"""
         return deepcopy(self)
 
@@ -166,41 +167,46 @@ class Brush:
         """Set a new texture for all faces in the brush"""
         for face in self:
             face.set_texture(new_texture)
-
-    def _get_vertices(self) -> List[Point]:
-        """Return the vertices of the brush using another optimized approach."""
-        #TODO: implement faster vertex enumeration
+                
+    def _vertex_enumeration(self) -> list[Point]:
+        """Return the vertices of the brush"""
         brush_vertices = []
-
         num_faces = len(self.faces)
-        face_normals = [face.plane.normal for face in self.faces]
+        all_faces = self.faces
 
         for i in range(num_faces - 2):
-            plane_i = self.faces[i].plane
+            face_i = all_faces[i]
 
-            for j in range(i, num_faces - 1):
-                plane_j = self.faces[j].plane
+            for j in range(i + 1, num_faces - 1):
+                face_j = all_faces[j]
 
-                for k in range(j, num_faces):
-                    plane_k = self.faces[k].plane
+                for k in range(j + 1, num_faces):
+                    face_k = all_faces[k]
 
                     # Point of intersection
-                    vertex = get_intersection(plane_i, plane_j, plane_k)
+                    vertex = get_plane_intersection(face_i.plane, face_j.plane, face_k.plane)
                     if vertex:
-                        as_vector = vertex.as_vector()
+                        as_vector = Vector3(vertex.x, vertex.y, vertex.z)
 
-                        # Check if the vertex is out of the brush for all faces
-                        if all(
-                            face_normals[m].dot(as_vector) + self.faces[m].plane.d <= 0
-                            for m in range(num_faces) if m != i and m != j and m != k
-                        ):
-                            self.faces[i]._add_vertex(vertex)
-                            self.faces[j]._add_vertex(vertex)
-                            self.faces[k]._add_vertex(vertex)
+                        # Check if the point is outside
+                        outside_brush = False
+                        for m in range(num_faces):
+                            if m != i and m != j and m != k:
+                                plane_m = all_faces[m].plane
+                                if plane_m.normal.dot(as_vector) + plane_m.d > 0:
+                                    outside_brush = True
+                                    break
+
+                        if not outside_brush and not any(vertex.is_close(v) for v in brush_vertices):
                             brush_vertices.append(vertex)
+                            face_i._add_vertex(vertex)
+                            face_i.sort_vertices_clockwise()
 
-        for face in self.faces:
-            face.sort_vertices_clockwise()
+                            face_j._add_vertex(vertex)
+                            face_j.sort_vertices_clockwise()
+
+                            face_k._add_vertex(vertex)
+                            face_k.sort_vertices_clockwise()
         return brush_vertices
 
 
