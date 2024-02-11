@@ -2,7 +2,6 @@
 ---------
 Python library to manipulate goldsrc engine .map files
 
-work in progress...
 
 # Usage
 
