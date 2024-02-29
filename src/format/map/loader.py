@@ -27,7 +27,7 @@ def load_map(filepath: str) -> Map:
             if not tokens or line.startswith('//'):
                 continue
 
-            if tokens[0] == '{':
+            elif tokens[0] == '{':
                 brace_count += 1
                 if brace_count == 1:
                     current_entity = Entity()
